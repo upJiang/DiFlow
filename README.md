@@ -4,12 +4,14 @@
 
 ## 技术栈
 
-- **前端框架**: Nuxt3 + Vue3 + TypeScript
-- **UI 组件库**: Ant Design Vue + Tailwind CSS
+- **框架**: Nuxt.js 3
+- **语言**: TypeScript
+- **UI 组件库**: Ant Design Vue
 - **状态管理**: Pinia
-- **数据库**: Prisma + SQLite
-- **身份验证**: JWT
-- **AI 模型**: DeepSeek (通过硅基流动)
+- **数据库**: MySQL
+- **ORM**: Prisma
+- **身份认证**: JWT
+- **AI 集成**: OpenAI API
 - **构建工具**: Vite
 - **代码规范**: ESLint + TypeScript
 

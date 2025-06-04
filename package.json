@@ -29,11 +29,11 @@
     "eslint": "^8.56.0",
     "nuxt": "^3.15.0",
     "prisma": "^5.7.1",
+    "sass": "^1.89.1",
     "typescript": "^5.7.2",
     "vue-tsc": "^1.8.25"
   },
   "dependencies": {
-    "@pinia/nuxt": "^0.5.1",
     "@prisma/client": "^5.7.1",
     "ant-design-vue": "^4.0.8",
     "bcryptjs": "^2.4.3",

@@ -1,15 +1,15 @@
 <template>
-  <div class="min-h-screen">
+  <div class="workflow-page">
     <!-- 顶部导航 -->
-    <header class="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
+    <header class="workflow-header">
+      <div class="header-container">
+        <div class="header-content">
           <!-- Logo 和导航 -->
-          <div class="flex items-center space-x-8">
-            <NuxtLink to="/" class="text-2xl font-bold text-primary-600">
+          <div class="nav-section">
+            <NuxtLink to="/" class="logo-link">
               🤖 DiFlow
             </NuxtLink>
-            <nav class="flex space-x-6">
+            <nav class="nav-menu">
               <NuxtLink 
                 to="/chat" 
                 class="nav-link"
@@ -32,13 +32,13 @@
           </div>
 
           <!-- 用户信息 -->
-          <div class="flex items-center space-x-4">
+          <div class="user-section">
             <a-dropdown>
-              <a-button type="text" class="flex items-center space-x-2">
-                <a-avatar :size="32" class="bg-primary-500">
+              <a-button type="text" class="user-button">
+                <a-avatar :size="32" class="user-avatar">
                   {{ authStore.user?.username?.charAt(0).toUpperCase() }}
                 </a-avatar>
-                <span class="hidden sm:inline">{{ authStore.user?.username }}</span>
+                <span class="username">{{ authStore.user?.username }}</span>
                 <DownOutlined />
               </a-button>
               <template #overlay>
@@ -56,36 +56,34 @@
     </header>
 
     <!-- 工作流主要内容 -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="flex h-[calc(100vh-12rem)]">
+    <main class="workflow-main">
+      <div class="workflow-container">
         <!-- 左侧工作流列表 -->
-        <div class="w-80 bg-white/70 backdrop-blur-sm rounded-2xl p-4 mr-4">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-800">我的工作流</h3>
+        <div class="workflow-sidebar">
+          <div class="sidebar-header">
+            <h3 class="sidebar-title">我的工作流</h3>
             <a-button
               type="primary"
               size="small"
               @click="createWorkflow"
-              class="btn-cartoon btn-primary"
+              class="new-workflow-btn"
             >
-              新建
+              ✨ 新建
             </a-button>
           </div>
           
-          <div class="space-y-2 max-h-96 overflow-y-auto">
+          <div class="workflow-list">
             <div
               v-for="workflow in workflows"
               :key="workflow.id"
               :class="[
-                'p-3 rounded-xl cursor-pointer transition-all duration-200',
-                selectedWorkflowId === workflow.id
-                  ? 'bg-primary-100 border-2 border-primary-300'
-                  : 'bg-gray-50 hover:bg-gray-100'
+                'workflow-item',
+                selectedWorkflowId === workflow.id ? 'active' : ''
               ]"
               @click="selectWorkflow(workflow.id)"
             >
-              <div class="font-medium text-sm truncate">{{ workflow.name }}</div>
-              <div class="text-xs text-gray-500 mt-1">
+              <div class="workflow-name">{{ workflow.name }}</div>
+              <div class="workflow-meta">
                 {{ workflow.status }} • {{ formatDate(workflow.updatedAt) }}
               </div>
             </div>
@@ -93,66 +91,64 @@
         </div>
 
         <!-- 主工作区域 -->
-        <div class="flex-1 flex flex-col">
+        <div class="workflow-content">
           <!-- 工具栏 -->
-          <div class="bg-white/70 backdrop-blur-sm rounded-2xl p-4 mb-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-4">
-                <span class="text-sm font-medium text-gray-700">当前工作流：</span>
-                <span class="text-primary-600 font-semibold">
-                  {{ selectedWorkflow?.name || '请选择工作流' }}
-                </span>
-              </div>
-              <div class="flex space-x-2">
-                <a-button 
-                  v-if="selectedWorkflow"
-                  @click="saveWorkflow"
-                  :loading="isSaving"
-                  class="btn-cartoon"
-                >
-                  💾 保存
-                </a-button>
-                <a-button 
-                  v-if="selectedWorkflow"
-                  @click="runWorkflow"
-                  :loading="isRunning"
-                  class="btn-cartoon btn-primary"
-                >
-                  ▶️ 运行
-                </a-button>
-              </div>
+          <div class="workflow-toolbar">
+            <div class="toolbar-info">
+              <span class="current-label">当前工作流：</span>
+              <span class="current-name">
+                {{ selectedWorkflow?.name || '请选择工作流' }}
+              </span>
+            </div>
+            <div class="toolbar-actions">
+              <a-button 
+                v-if="selectedWorkflow"
+                @click="saveWorkflow"
+                :loading="isSaving"
+                class="save-btn"
+              >
+                💾 保存
+              </a-button>
+              <a-button 
+                v-if="selectedWorkflow"
+                @click="runWorkflow"
+                :loading="isRunning"
+                class="run-btn"
+              >
+                ▶️ 运行
+              </a-button>
             </div>
           </div>
 
           <!-- 工作流画布 -->
-          <div class="flex-1 bg-white/70 backdrop-blur-sm rounded-2xl p-4 overflow-hidden relative">
+          <div class="workflow-canvas-area">
             <div 
               v-if="!selectedWorkflow"
-              class="absolute inset-0 flex items-center justify-center"
+              class="empty-state"
             >
-              <div class="text-center text-gray-500">
-                <div class="text-6xl mb-4">🔄</div>
-                <h3 class="text-xl font-semibold mb-2">工作流设计器</h3>
-                <p>选择一个工作流开始编辑，或创建新的工作流</p>
+              <div class="empty-content">
+                <div class="empty-icon">🔄</div>
+                <h3 class="empty-title">工作流设计器</h3>
+                <p class="empty-description">选择一个工作流开始编辑，或创建新的工作流</p>
               </div>
             </div>
 
-            <div v-else class="h-full flex">
+            <div v-else class="canvas-layout">
               <!-- 节点面板 -->
-              <div class="w-64 bg-gray-50/80 rounded-xl p-4 mr-4">
-                <h4 class="font-semibold text-gray-800 mb-4">节点库</h4>
-                <div class="space-y-2">
+              <div class="node-panel">
+                <h4 class="panel-title">节点库</h4>
+                <div class="node-types">
                   <div
                     v-for="nodeType in nodeTypes"
                     :key="nodeType.type"
-                    class="p-3 bg-white rounded-lg cursor-pointer hover:bg-primary-50 transition-colors border border-gray-200"
+                    class="node-type-item"
                     @click="addNode(nodeType)"
                   >
-                    <div class="flex items-center space-x-2">
-                      <span>{{ nodeType.icon }}</span>
-                      <div>
-                        <div class="font-medium text-sm">{{ nodeType.name }}</div>
-                        <div class="text-xs text-gray-500">{{ nodeType.description }}</div>
+                    <div class="node-type-content">
+                      <span class="node-icon">{{ nodeType.icon }}</span>
+                      <div class="node-info">
+                        <div class="node-name">{{ nodeType.name }}</div>
+                        <div class="node-description">{{ nodeType.description }}</div>
                       </div>
                     </div>
                   </div>
@@ -160,11 +156,10 @@
               </div>
 
               <!-- 画布区域 -->
-              <div class="flex-1 bg-gray-100/50 rounded-xl p-4 relative overflow-auto">
+              <div class="canvas-container">
                 <div 
                   ref="canvas"
-                  class="relative min-h-full"
-                  style="background-image: radial-gradient(circle, #ddd 1px, transparent 1px); background-size: 20px 20px;"
+                  class="canvas"
                 >
                   <!-- 工作流节点 -->
                   <div
@@ -181,17 +176,15 @@
                   >
                     <div 
                       :class="[
-                        'p-4 bg-white rounded-xl shadow-lg border-2 cursor-move min-w-32',
-                        selectedNodeId === node.id 
-                          ? 'border-primary-400' 
-                          : 'border-gray-200'
+                        'node-card',
+                        selectedNodeId === node.id ? 'selected' : ''
                       ]"
                     >
-                      <div class="flex items-center space-x-2 mb-2">
-                        <span>{{ getNodeType(node.type)?.icon }}</span>
-                        <span class="font-medium text-sm">{{ node.name }}</span>
+                      <div class="node-header">
+                        <span class="node-icon">{{ getNodeType(node.type)?.icon }}</span>
+                        <span class="node-title">{{ node.name }}</span>
                       </div>
-                      <div class="text-xs text-gray-500">{{ node.type }}</div>
+                      <div class="node-type">{{ node.type }}</div>
                     </div>
                   </div>
                 </div>
@@ -441,22 +434,545 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
-/* 导航链接样式 */
+<style scoped lang="scss">
+.workflow-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+    animation: backgroundShift 20s ease-in-out infinite;
+  }
+}
+
+@keyframes backgroundShift {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  33% { transform: translateX(-20px) translateY(-10px); }
+  66% { transform: translateX(20px) translateY(10px); }
+}
+
+.workflow-header {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
+}
+
+.nav-section {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.logo-link {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.nav-menu {
+  display: flex;
+  gap: 1.5rem;
+}
+
 .nav-link {
-  @apply px-4 py-2 rounded-xl text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 font-medium;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #666;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    transform: translateY(-2px);
+  }
+  
+  &.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
 }
 
-.nav-link.active {
-  @apply text-primary-600 bg-primary-100;
+.user-section {
+  display: flex;
+  align-items: center;
 }
 
-/* 工作流节点样式 */
+.user-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(102, 126, 234, 0.1);
+  }
+}
+
+.user-avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.username {
+  font-weight: 500;
+  color: #333;
+  
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+.workflow-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.workflow-container {
+  display: flex;
+  height: calc(100vh - 12rem);
+  gap: 1.5rem;
+}
+
+.workflow-sidebar {
+  width: 320px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.new-workflow-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4) !important;
+  }
+}
+
+.workflow-list {
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(102, 126, 234, 0.3);
+    border-radius: 3px;
+    
+    &:hover {
+      background: rgba(102, 126, 234, 0.5);
+    }
+  }
+}
+
+.workflow-item {
+  padding: 0.75rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid transparent;
+  
+  &:hover {
+    background: rgba(102, 126, 234, 0.05);
+    transform: translateY(-1px);
+  }
+  
+  &.active {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  }
+}
+
+.workflow-name {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workflow-meta {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.workflow-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.workflow-toolbar {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toolbar-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.current-label {
+  font-weight: 500;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.current-name {
+  font-weight: 600;
+  color: #667eea;
+  font-size: 0.875rem;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.save-btn, .run-btn {
+  border-radius: 12px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  
+  &:hover {
+    transform: translateY(-2px) !important;
+  }
+}
+
+.save-btn {
+  background: rgba(102, 126, 234, 0.1) !important;
+  border-color: rgba(102, 126, 234, 0.3) !important;
+  color: #667eea !important;
+  
+  &:hover {
+    background: rgba(102, 126, 234, 0.2) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+  }
+}
+
+.run-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  
+  &:hover {
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4) !important;
+  }
+}
+
+.workflow-canvas-area {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 1.5rem;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-content {
+  text-align: center;
+  color: #666;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.empty-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.empty-description {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0;
+}
+
+.canvas-layout {
+  height: 100%;
+  display: flex;
+  gap: 1rem;
+}
+
+.node-panel {
+  width: 256px;
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 16px;
+  padding: 1rem;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.panel-title {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.node-types {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.node-type-item {
+  padding: 0.75rem;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+  
+  &:hover {
+    background: rgba(102, 126, 234, 0.05);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  }
+}
+
+.node-type-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.node-icon {
+  font-size: 1.25rem;
+}
+
+.node-info {
+  flex: 1;
+}
+
+.node-name {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #333;
+}
+
+.node-description {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 0.125rem;
+}
+
+.canvas-container {
+  flex: 1;
+  background: rgba(248, 250, 252, 0.5);
+  border-radius: 16px;
+  padding: 1rem;
+  position: relative;
+  overflow: auto;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.canvas {
+  position: relative;
+  min-height: 100%;
+  background-image: radial-gradient(circle, rgba(102, 126, 234, 0.2) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
 .workflow-node {
-  @apply select-none;
+  position: absolute;
+  z-index: 10;
 }
 
-.workflow-node:hover {
-  @apply z-10;
+.node-card {
+  padding: 1rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  cursor: move;
+  min-width: 128px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  &.selected {
+    border-color: #667eea;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  }
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.node-title {
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: #333;
+}
+
+.node-type {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+// 响应式设计
+@media (max-width: 1024px) {
+  .workflow-container {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .workflow-sidebar {
+    width: 100%;
+    order: 2;
+  }
+  
+  .workflow-content {
+    order: 1;
+    min-height: 60vh;
+  }
+  
+  .canvas-layout {
+    flex-direction: column;
+  }
+  
+  .node-panel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .workflow-main {
+    padding: 1rem;
+  }
+  
+  .workflow-container {
+    gap: 1rem;
+  }
+  
+  .workflow-sidebar,
+  .workflow-toolbar,
+  .workflow-canvas-area {
+    padding: 1rem;
+  }
+  
+  .toolbar-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .toolbar-actions {
+    margin-top: 0.5rem;
+  }
 }
 </style> 

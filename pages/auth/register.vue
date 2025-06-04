@@ -7,11 +7,11 @@
         <div class="header-section">
           <div class="logo-container">
             <div class="logo-circle">
-              <span class="logo-icon">✨</span>
+              <span class="logo-icon">🤖</span>
             </div>
           </div>
           <h1 class="brand-title">DiFlow</h1>
-          <p class="brand-subtitle">创建您的专属账户，开启AI助手之旅</p>
+          <p class="brand-subtitle">创建您的账户，开启AI之旅</p>
         </div>
 
         <!-- 表单区域 -->
@@ -23,10 +23,10 @@
             </label>
             <input
               id="username"
-              v-model="form.username"
+              v-model="username"
               type="text"
               class="form-input"
-              placeholder="请输入您的用户名"
+              placeholder="请输入用户名"
               required
             />
           </div>
@@ -38,10 +38,10 @@
             </label>
             <input
               id="password"
-              v-model="form.password"
+              v-model="password"
               type="password"
               class="form-input"
-              placeholder="请输入您的密码"
+              placeholder="请输入密码"
               required
             />
           </div>
@@ -53,10 +53,10 @@
             </label>
             <input
               id="confirmPassword"
-              v-model="form.confirmPassword"
+              v-model="confirmPassword"
               type="password"
               class="form-input"
-              placeholder="请再次输入您的密码"
+              placeholder="请再次输入密码"
               required
             />
           </div>
@@ -64,10 +64,10 @@
           <button
             type="submit"
             class="register-button"
-            :disabled="isLoading"
+            :disabled="!username || !password || !confirmPassword || isLoading"
           >
             <span v-if="isLoading" class="loading-spinner"></span>
-            <span v-else class="button-icon">🎉</span>
+            <span v-else class="button-icon">✨</span>
             {{ isLoading ? '注册中...' : '立即注册' }}
           </button>
         </form>
@@ -85,18 +85,6 @@
             立即登录
           </NuxtLink>
         </div>
-
-        <!-- 错误信息 -->
-        <div v-if="errorMessage" class="error-message">
-          <span class="error-icon">⚠️</span>
-          {{ errorMessage }}
-        </div>
-
-        <!-- 成功信息 -->
-        <div v-if="successMessage" class="success-message">
-          <span class="success-icon">✅</span>
-          {{ successMessage }}
-        </div>
       </div>
 
       <!-- 装饰元素 -->
@@ -106,11 +94,20 @@
         <div class="floating-circle circle-3"></div>
       </div>
     </div>
+
+    <!-- 错误通知组件 -->
+    <ErrorNotification
+      :visible="notificationState.visible"
+      :title="notificationState.title"
+      :message="notificationState.message"
+      :duration="notificationState.duration"
+      @close="hideError"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { RegisterRequest } from '~/types'
+import { ref, onMounted } from 'vue'
 
 // 页面元数据
 definePageMeta({
@@ -118,53 +115,49 @@ definePageMeta({
   middleware: []
 })
 
+// 响应式数据
+const username = ref('')
+const password = ref('')
+const confirmPassword = ref('')
+const isLoading = ref(false)
+
 // 状态管理
 const authStore = useAuthStore()
 
-// 响应式数据
-const form = reactive<RegisterRequest & { confirmPassword: string }>({
-  username: '',
-  password: '',
-  confirmPassword: ''
-})
-
-const isLoading = ref(false)
-const errorMessage = ref('')
-const successMessage = ref('')
+// 错误通知
+const { notificationState, showApiError, hideError, showError } = useErrorNotification()
 
 // 处理注册
 const handleRegister = async () => {
-  errorMessage.value = ''
-  successMessage.value = ''
-  
-  // 验证密码确认
-  if (form.password !== form.confirmPassword) {
-    errorMessage.value = '两次输入的密码不匹配'
+  // 验证输入
+  if (!username.value || !password.value || !confirmPassword.value) {
+    showError('请填写所有字段')
     return
   }
   
-  if (form.password.length < 6) {
-    errorMessage.value = '密码长度至少6位'
+  if (password.value !== confirmPassword.value) {
+    showError('两次输入的密码不一致')
+    return
+  }
+
+  if (password.value.length < 6) {
+    showError('密码长度至少为6个字符')
     return
   }
   
   isLoading.value = true
   
   try {
-    const registerData: RegisterRequest = {
-      username: form.username,
-      password: form.password
-    }
+    await authStore.register({ 
+      username: username.value, 
+      password: password.value 
+    })
     
-    await authStore.register(registerData)
-    successMessage.value = '注册成功！正在跳转...'
-    
-    // 延迟跳转到登录页面
-    setTimeout(() => {
-      navigateTo('/auth/login')
-    }, 1500)
+    // 注册成功后直接跳转到登录页面，让用户手动登录
+    await navigateTo('/auth/login', { replace: true })
   } catch (error: any) {
-    errorMessage.value = error.message || '注册失败，请重试'
+    console.log('注册错误:', error)
+    showApiError(error)
   } finally {
     isLoading.value = false
   }
@@ -172,14 +165,13 @@ const handleRegister = async () => {
 
 // 检查是否已登录
 onMounted(() => {
-  authStore.init()
   if (authStore.isAuthenticated) {
-    navigateTo('/')
+    navigateTo('/', { replace: true })
   }
 })
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .register-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -243,51 +235,47 @@ onMounted(() => {
 }
 
 .logo-container {
+  display: flex;
+  justify-content: center;
   margin-bottom: 1.5rem;
 }
 
 .logo-circle {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #7673fe 0%, #6e47d9 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto;
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-  animation: logoSpin 10s linear infinite;
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+  animation: logoSpin 3s ease-in-out infinite;
 }
 
 @keyframes logoSpin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
 }
 
 .logo-icon {
-  font-size: 2.5rem;
-  animation: iconBounce 2s ease-in-out infinite;
-}
-
-@keyframes iconBounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  font-size: 40px;
 }
 
 .brand-title {
+  color: #333;
   font-size: 2.5rem;
-  font-weight: bold;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 0.5rem;
 }
 
 .brand-subtitle {
   color: #666;
   font-size: 1rem;
-  margin: 0;
+  margin-bottom: 0;
 }
 
 .register-form {
@@ -301,79 +289,73 @@ onMounted(() => {
 .form-label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  color: #333;
   font-weight: 600;
-  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: #555;
 }
 
 .label-icon {
-  font-size: 1rem;
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
 }
 
 .form-input {
   width: 100%;
-  padding: 1rem 1.5rem;
-  border: 2px solid #e1e5e9;
+  padding: 0.75rem 1rem;
   border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
   font-size: 1rem;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.8);
-  box-sizing: border-box;
-}
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 
-.form-input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  background: rgba(255, 255, 255, 0.95);
-}
-
-.form-input::placeholder {
-  color: #999;
+  &:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+  }
 }
 
 .register-button {
   width: 100%;
-  padding: 1rem 1.5rem;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  border: none;
+  padding: 0.75rem;
   border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
   font-size: 1rem;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(118, 75, 162, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
 }
 
-.register-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-}
-
-.register-button:active {
-  transform: translateY(0);
-}
-
-.register-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
+.button-icon {
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
 }
 
 .loading-spinner {
   width: 20px;
   height: 20px;
   border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid white;
   border-radius: 50%;
+  border-top-color: white;
   animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
 }
 
 @keyframes spin {
@@ -381,33 +363,23 @@ onMounted(() => {
   100% { transform: rotate(360deg); }
 }
 
-.button-icon {
-  font-size: 1.2rem;
-}
-
 .divider {
-  position: relative;
-  text-align: center;
+  display: flex;
+  align-items: center;
   margin: 2rem 0;
-}
 
-.divider::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #ddd, transparent);
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+  }
 }
 
 .divider-text {
-  background: rgba(255, 255, 255, 0.95);
   padding: 0 1rem;
-  color: #999;
-  font-size: 0.9rem;
-  position: relative;
-  z-index: 1;
+  color: #888;
 }
 
 .login-section {
@@ -416,88 +388,26 @@ onMounted(() => {
 
 .login-text {
   color: #666;
-  margin: 0 0 1rem 0;
-  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
 }
 
 .login-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: rgba(102, 126, 234, 0.1);
   color: #667eea;
-  text-decoration: none;
-  border-radius: 12px;
   font-weight: 600;
+  text-decoration: none;
   transition: all 0.3s ease;
-  border: 2px solid rgba(102, 126, 234, 0.2);
-}
 
-.login-link:hover {
-  background: rgba(102, 126, 234, 0.15);
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+  &:hover {
+    color: #764ba2;
+  }
 }
 
 .link-icon {
-  font-size: 1rem;
+  margin-right: 0.5rem;
 }
 
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 12px;
-  color: #dc2626;
-  font-size: 0.9rem;
-  margin-top: 1rem;
-  animation: shake 0.5s ease-in-out;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
-}
-
-.error-icon {
-  font-size: 1rem;
-}
-
-.success-message {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 1rem;
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.2);
-  border-radius: 12px;
-  color: #16a34a;
-  font-size: 0.9rem;
-  margin-top: 1rem;
-  animation: slideIn 0.5s ease-out;
-}
-
-@keyframes slideIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.success-icon {
-  font-size: 1rem;
-}
-
-/* 装饰元素 */
 .decoration-elements {
   position: absolute;
   top: 0;
@@ -505,70 +415,54 @@ onMounted(() => {
   right: 0;
   bottom: 0;
   pointer-events: none;
-  z-index: 0;
+  z-index: -1;
 }
 
 .floating-circle {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  animation: float 8s ease-in-out infinite;
+  opacity: 0.5;
 }
 
 .circle-1 {
-  width: 60px;
-  height: 60px;
-  top: 20%;
-  left: 10%;
-  animation-delay: 0s;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.5) 0%, rgba(102, 126, 234, 0) 70%);
+  top: -100px;
+  right: 10%;
+  animation: float1 15s ease-in-out infinite;
 }
 
 .circle-2 {
-  width: 80px;
-  height: 80px;
-  top: 60%;
-  right: 15%;
-  animation-delay: 2s;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(118, 75, 162, 0.5) 0%, rgba(118, 75, 162, 0) 70%);
+  bottom: -150px;
+  left: -150px;
+  animation: float2 20s ease-in-out infinite;
 }
 
 .circle-3 {
-  width: 40px;
-  height: 40px;
-  bottom: 30%;
-  left: 20%;
-  animation-delay: 4s;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(255, 183, 77, 0.5) 0%, rgba(255, 183, 77, 0) 70%);
+  top: 30%;
+  left: -75px;
+  animation: float3 18s ease-in-out infinite;
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) translateX(0px);
-  }
-  33% {
-    transform: translateY(-20px) translateX(10px);
-  }
-  66% {
-    transform: translateY(10px) translateX(-10px);
-  }
+@keyframes float1 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(30px, 30px); }
 }
 
-/* 响应式设计 */
-@media (max-width: 480px) {
-  .register-card {
-    padding: 2rem;
-    margin: 1rem;
-  }
-  
-  .brand-title {
-    font-size: 2rem;
-  }
-  
-  .logo-circle {
-    width: 60px;
-    height: 60px;
-  }
-  
-  .logo-icon {
-    font-size: 2rem;
-  }
+@keyframes float2 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(20px, -20px); }
+}
+
+@keyframes float3 {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-20px, 20px); }
 }
 </style>

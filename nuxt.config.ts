@@ -1,48 +1,58 @@
+// https://nuxt.com/docs/api/configuration/nuxt-config
+
 export default defineNuxtConfig({
-  devtools: { enabled: true },
-  
+  compatibilityDate: '2024-04-03',
+  devtools: { enabled: false },
   modules: [
     '@pinia/nuxt'
   ],
-
-  css: [
-    'ant-design-vue/dist/reset.css',
-    '~/assets/css/main.css'
-  ],
-
-  plugins: [
-    '~/plugins/antd.client.ts'
-  ],
-
-  nitro: {
-    experimental: {
-      wasm: true
-    }
-  },
-
+  
+  // 运行时配置 - 安全的环境变量处理方式
   runtimeConfig: {
-    // 私有环境变量（仅服务器端）
-    jwtSecret: process.env.JWT_SECRET || 'your-secret-key',
-    openaiApiKey: process.env.OPENAI_API_KEY || '',
-    
-    // 公共环境变量（客户端也可访问）
+    // 私有配置 - 只在服务端可用
+    jwtSecret: process.env.JWT_SECRET || 'your-secret-key-please-change-in-production',
     public: {
-      apiBase: process.env.API_BASE || '/api'
+      // 公共配置 - 客户端和服务端都可用
+      apiBase: '/api'
     }
   },
-
-  typescript: {
-    strict: true,
-    typeCheck: false
+  
+  // 开发服务器配置
+  devServer: {
+    port: 3000,
+    host: 'localhost'
   },
-
-  build: {
-    transpile: ['ant-design-vue']
-  },
-
+  
+  // Vite 配置优化
   vite: {
-    ssr: {
-      noExternal: ['ant-design-vue']
+    optimizeDeps: {
+      include: ['vue', '@vue/runtime-core', '@vue/shared']
+    },
+    server: {
+      hmr: {
+        port: 24678,
+        overlay: false
+      },
+      watch: {
+        usePolling: false,
+        ignored: ['**/node_modules/**', '**/dist/**']
+      }
+    },
+    build: {
+      sourcemap: false
     }
-  }
+  },
+  
+  // 构建优化
+  build: {
+    transpile: []
+  },
+  
+  // 实验性功能
+  experimental: {
+    payloadExtraction: false
+  },
+  
+  // 开发模式优化
+  dev: process.env.NODE_ENV === 'development'
 }) 

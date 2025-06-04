@@ -1,0 +1,30 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# DiFlow 项目概述
+
+DiFlow是一个基于Nuxt.js 3框架的应用程序，主要功能包括用户认证、聊天和工作流管理。
+
+## 技术栈
+- 前端框架: [Nuxt.js 3](mdc:nuxt.config.ts)
+- UI库: Ant Design Vue
+- 状态管理: Pinia
+- 数据库ORM: Prisma
+- 认证: JWT
+
+## 主要配置文件
+- [nuxt.config.ts](mdc:nuxt.config.ts): Nuxt.js配置
+- [package.json](mdc:package.json): 项目依赖
+- [prisma/schema.prisma](mdc:prisma/schema.prisma): 数据库模型定义
+
+## 项目结构
+- `pages/`: 页面组件
+- `server/`: API路由和服务器端代码
+- `prisma/`: 数据库模型和迁移
+- `stores/`: Pinia状态管理
+- `plugins/`: Nuxt插件
+- `utils/`: 通用工具函数
+- `middleware/`: Nuxt中间件
+

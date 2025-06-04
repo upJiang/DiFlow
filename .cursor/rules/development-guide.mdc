@@ -1,0 +1,63 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 开发指南
+
+## 项目设置
+
+1. 安装依赖:
+```bash
+yarn install
+```
+
+2. 初始化数据库:
+```bash
+yarn db:generate
+yarn db:push
+```
+
+3. 启动开发服务器:
+```bash
+yarn dev
+```
+
+## 代码规范
+
+DiFlow项目使用ESLint进行代码质量控制，配置文件是 [eslint.config.js](mdc:eslint.config.js)。
+
+运行代码检查:
+```bash
+yarn lint:check
+```
+
+自动修复代码样式问题:
+```bash
+yarn lint
+```
+
+## 数据库操作
+
+1. 修改数据库模型 ([prisma/schema.prisma](mdc:prisma/schema.prisma))
+2. 生成Prisma客户端:
+```bash
+yarn db:generate
+```
+3. 将更改应用到数据库:
+```bash
+yarn db:push
+```
+
+## API开发流程
+
+在Nuxt.js中，API路由遵循以下命名约定:
+- `server/api/[route].[method].ts`
+- 例如: `server/api/users.get.ts`, `server/api/auth/login.post.ts`
+
+## 前端开发
+
+遵循Nuxt.js的约定式路由:
+- 创建 `pages/[route].vue` 文件会自动生成对应的路由
+- 嵌套路由通过创建目录和索引文件实现
+

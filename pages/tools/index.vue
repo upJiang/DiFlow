@@ -1,15 +1,15 @@
 <template>
-  <div class="min-h-screen">
+  <div class="tools-page">
     <!-- 顶部导航 -->
-    <header class="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
+    <header class="tools-header">
+      <div class="header-container">
+        <div class="header-content">
           <!-- Logo 和导航 -->
-          <div class="flex items-center space-x-8">
-            <NuxtLink to="/" class="text-2xl font-bold text-primary-600">
+          <div class="nav-section">
+            <NuxtLink to="/" class="logo-link">
               🤖 DiFlow
             </NuxtLink>
-            <nav class="flex space-x-6">
+            <nav class="nav-menu">
               <NuxtLink 
                 to="/chat" 
                 class="nav-link"
@@ -32,13 +32,13 @@
           </div>
 
           <!-- 用户信息 -->
-          <div class="flex items-center space-x-4">
+          <div class="user-section">
             <a-dropdown>
-              <a-button type="text" class="flex items-center space-x-2">
-                <a-avatar :size="32" class="bg-primary-500">
+              <a-button type="text" class="user-button">
+                <a-avatar :size="32" class="user-avatar">
                   {{ authStore.user?.username?.charAt(0).toUpperCase() }}
                 </a-avatar>
-                <span class="hidden sm:inline">{{ authStore.user?.username }}</span>
+                <span class="username">{{ authStore.user?.username }}</span>
                 <DownOutlined />
               </a-button>
               <template #overlay>
@@ -56,23 +56,23 @@
     </header>
 
     <!-- 工具主要内容 -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="tools-main">
       <!-- 工具分类导航 -->
-      <div class="mb-8">
-        <div class="flex items-center justify-between mb-6">
-          <h1 class="text-3xl font-bold text-gray-900">🛠️ 工具箱</h1>
-          <div class="flex items-center space-x-4">
+      <div class="tools-header-section">
+        <div class="tools-title-bar">
+          <h1 class="page-title">🛠️ 工具箱</h1>
+          <div class="tools-actions">
             <a-input-search
               v-model:value="searchQuery"
               placeholder="搜索工具..."
               size="large"
-              class="w-80"
+              class="search-input"
               @search="onSearch"
             />
             <a-button 
               type="primary"
               @click="showCreateTool = true"
-              class="btn-cartoon btn-primary"
+              class="add-tool-btn"
             >
               ➕ 添加工具
             </a-button>
@@ -91,17 +91,17 @@
       </div>
 
       <!-- 工具网格 -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div class="tools-grid">
         <div
           v-for="tool in filteredTools"
           :key="tool.id"
-          class="tool-card bg-white/70 backdrop-blur-sm rounded-2xl p-6 hover:shadow-lg transition-all duration-300 border border-gray-200/50"
+          class="tool-card"
           @click="openTool(tool)"
         >
-          <div class="flex items-start justify-between mb-4">
-            <div class="text-4xl">{{ tool.icon }}</div>
+          <div class="tool-card-header">
+            <div class="tool-icon">{{ tool.icon }}</div>
             <a-dropdown>
-              <a-button type="text" size="small" class="text-gray-400 hover:text-gray-600">
+              <a-button type="text" size="small" class="tool-menu-btn">
                 <MoreOutlined />
               </a-button>
               <template #overlay>
@@ -115,7 +115,7 @@
                     复制
                   </a-menu-item>
                   <a-menu-divider />
-                  <a-menu-item key="delete" @click.stop="deleteTool(tool)" class="text-red-500">
+                  <a-menu-item key="delete" @click.stop="deleteTool(tool)" class="delete-item">
                     <DeleteOutlined />
                     删除
                   </a-menu-item>
@@ -124,31 +124,33 @@
             </a-dropdown>
           </div>
 
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ tool.name }}</h3>
-          <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ tool.description }}</p>
+          <h3 class="tool-name">{{ tool.name }}</h3>
+          <p class="tool-description">{{ tool.description }}</p>
 
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-2">
-              <span class="px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-lg">
+          <div class="tool-footer">
+            <div class="tool-meta">
+              <span class="tool-category">
                 {{ getCategoryName(tool.category) }}
               </span>
-              <span class="text-xs text-gray-500">{{ tool.usage }}次使用</span>
+              <span class="tool-usage">{{ tool.usage }}次使用</span>
             </div>
-            <div class="flex items-center space-x-1 text-yellow-500">
-              <StarFilled v-for="i in Math.floor(tool.rating)" :key="i" class="text-xs" />
-              <span class="text-xs text-gray-500">{{ tool.rating }}</span>
+            <div class="tool-rating">
+              <StarFilled v-for="i in Math.floor(tool.rating)" :key="i" class="star-icon" />
+              <span class="rating-text">{{ tool.rating }}</span>
             </div>
           </div>
         </div>
 
         <!-- 空状态 -->
-        <div v-if="filteredTools.length === 0" class="col-span-full flex flex-col items-center justify-center py-16">
-          <div class="text-6xl mb-4">🔍</div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">没有找到相关工具</h3>
-          <p class="text-gray-500 mb-4">尝试调整搜索关键词或选择其他分类</p>
-          <a-button type="primary" @click="clearSearch" class="btn-cartoon">
-            清除搜索
-          </a-button>
+        <div v-if="filteredTools.length === 0" class="empty-state">
+          <div class="empty-content">
+            <div class="empty-icon">🔍</div>
+            <h3 class="empty-title">没有找到相关工具</h3>
+            <p class="empty-description">尝试调整搜索关键词或选择其他分类</p>
+            <a-button type="primary" @click="clearSearch" class="clear-search-btn">
+              清除搜索
+            </a-button>
+          </div>
         </div>
       </div>
     </main>
@@ -162,58 +164,49 @@
       class="tool-detail-modal"
     >
       <div v-if="selectedTool" class="tool-detail">
-        <div class="flex items-center space-x-4 mb-6">
-          <div class="text-6xl">{{ selectedTool.icon }}</div>
-          <div>
-            <h2 class="text-2xl font-bold text-gray-900">{{ selectedTool.name }}</h2>
-            <p class="text-gray-600">{{ selectedTool.description }}</p>
-            <div class="flex items-center space-x-4 mt-2">
-              <span class="px-3 py-1 bg-primary-100 text-primary-700 text-sm rounded-lg">
+        <div class="tool-detail-header">
+          <div class="detail-icon">{{ selectedTool.icon }}</div>
+          <div class="detail-info">
+            <h2 class="detail-title">{{ selectedTool.name }}</h2>
+            <p class="detail-description">{{ selectedTool.description }}</p>
+            <div class="detail-meta">
+              <span class="detail-category">
                 {{ getCategoryName(selectedTool.category) }}
               </span>
-              <div class="flex items-center space-x-1 text-yellow-500">
+              <div class="detail-rating">
                 <StarFilled v-for="i in Math.floor(selectedTool.rating)" :key="i" />
-                <span class="text-gray-700 ml-1">{{ selectedTool.rating }} ({{ selectedTool.usage }}次使用)</span>
+                <span class="rating-info">{{ selectedTool.rating }} ({{ selectedTool.usage }}次使用)</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- 工具界面 -->
-        <div class="tool-interface bg-gray-50 rounded-xl p-6">
+        <div class="tool-interface">
           <div v-if="selectedTool.type === 'text-processor'">
-            <h3 class="text-lg font-semibold mb-4">文本处理</h3>
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">输入文本</label>
+            <h3 class="interface-title">文本处理</h3>
+            <div class="interface-content">
+              <div class="input-section">
+                <label class="input-label">输入文本</label>
                 <a-textarea
                   v-model:value="toolInput"
                   :rows="6"
                   placeholder="输入要处理的文本..."
-                  class="w-full"
+                  class="tool-textarea"
                 />
               </div>
-              <div class="flex space-x-2">
+              <div class="action-buttons">
                 <a-button 
                   type="primary" 
                   @click="processTool"
                   :loading="toolProcessing"
-                  class="btn-cartoon btn-primary"
+                  class="process-btn"
                 >
-                  处理文本
+                  🚀 处理
                 </a-button>
-                <a-button @click="clearToolData" class="btn-cartoon">
-                  清空
+                <a-button @click="clearToolInput" class="clear-btn">
+                  🗑️ 清空
                 </a-button>
-              </div>
-              <div v-if="toolOutput">
-                <label class="block text-sm font-medium text-gray-700 mb-2">处理结果</label>
-                <a-textarea
-                  v-model:value="toolOutput"
-                  :rows="6"
-                  readonly
-                  class="w-full bg-white"
-                />
               </div>
             </div>
           </div>
@@ -560,44 +553,575 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-/* 导航链接样式 */
+<style scoped lang="scss">
+.tools-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+    animation: backgroundShift 20s ease-in-out infinite;
+  }
+}
+
+@keyframes backgroundShift {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  33% { transform: translateX(-20px) translateY(-10px); }
+  66% { transform: translateX(20px) translateY(10px); }
+}
+
+.tools-header {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 4rem;
+}
+
+.nav-section {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.logo-link {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+.nav-menu {
+  display: flex;
+  gap: 1.5rem;
+}
+
 .nav-link {
-  @apply px-4 py-2 rounded-xl text-gray-600 hover:text-primary-600 hover:bg-primary-50 transition-all duration-200 font-medium;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #666;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    transform: translateY(-2px);
+  }
+  
+  &.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  }
 }
 
-.nav-link.active {
-  @apply text-primary-600 bg-primary-100;
+.user-section {
+  display: flex;
+  align-items: center;
 }
 
-/* 工具卡片样式 */
+.user-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(102, 126, 234, 0.1);
+  }
+}
+
+.user-avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.username {
+  font-weight: 500;
+  color: #333;
+  
+  @media (max-width: 640px) {
+    display: none;
+  }
+}
+
+.tools-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.tools-header-section {
+  margin-bottom: 2rem;
+}
+
+.tools-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tools-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+.search-input {
+  width: 320px;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+  
+  :deep(.ant-input) {
+    border-radius: 16px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    
+    &:focus {
+      border-color: #667eea !important;
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+    }
+  }
+  
+  :deep(.ant-input-search-button) {
+    border-radius: 0 16px 16px 0 !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+  }
+}
+
+.add-tool-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  border-radius: 16px !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+  
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4) !important;
+  }
+}
+
+.tool-tabs {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  
+  :deep(.ant-tabs-nav) {
+    margin: 0;
+  }
+  
+  :deep(.ant-tabs-tab) {
+    padding: 0.5rem 1rem !important;
+    border-radius: 12px !important;
+    margin: 0 0.25rem !important;
+    transition: all 0.3s ease !important;
+    
+    &:hover {
+      background: rgba(102, 126, 234, 0.1) !important;
+    }
+    
+    &.ant-tabs-tab-active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      
+      .ant-tabs-tab-btn {
+        color: white !important;
+      }
+    }
+  }
+  
+  :deep(.ant-tabs-ink-bar) {
+    display: none;
+  }
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
 .tool-card {
-  @apply cursor-pointer transform hover:scale-105;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+    border-color: rgba(102, 126, 234, 0.3);
+  }
 }
 
-.tool-card:hover {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+.tool-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
 }
 
-/* 工具详情模态框样式 */
-:deep(.tool-detail-modal .ant-modal-content) {
-  @apply overflow-hidden;
+.tool-icon {
+  font-size: 2.5rem;
+  animation: float 3s ease-in-out infinite;
 }
 
-/* 标签页样式 */
-:deep(.tool-tabs .ant-tabs-tab) {
-  @apply px-6 py-3 rounded-lg;
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
 }
 
-:deep(.tool-tabs .ant-tabs-tab-active) {
-  @apply bg-primary-50 text-primary-600;
+.tool-menu-btn {
+  color: #999 !important;
+  transition: all 0.3s ease !important;
+  
+  &:hover {
+    color: #667eea !important;
+    background: rgba(102, 126, 234, 0.1) !important;
+  }
 }
 
-/* 行截断样式 */
-.line-clamp-2 {
+.delete-item {
+  color: #ff4d4f !important;
+  
+  &:hover {
+    background: rgba(255, 77, 79, 0.1) !important;
+  }
+}
+
+.tool-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+}
+
+.tool-description {
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 1rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.tool-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tool-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tool-category {
+  padding: 0.25rem 0.5rem;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  font-size: 0.75rem;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.tool-usage {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.tool-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.star-icon {
+  color: #ffd700;
+  font-size: 0.75rem;
+}
+
+.rating-text {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+}
+
+.empty-content {
+  text-align: center;
+  color: white;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.empty-description {
+  font-size: 0.875rem;
+  opacity: 0.8;
+  margin-bottom: 1.5rem;
+}
+
+.clear-search-btn {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+  border-radius: 12px !important;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: translateY(-2px) !important;
+  }
+}
+
+// 模态框样式
+.tool-detail-modal {
+  :deep(.ant-modal-content) {
+    border-radius: 20px !important;
+    overflow: hidden;
+  }
+  
+  :deep(.ant-modal-header) {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    
+    .ant-modal-title {
+      color: white !important;
+      font-weight: 600 !important;
+    }
+  }
+  
+  :deep(.ant-modal-close) {
+    color: white !important;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.1) !important;
+    }
+  }
+}
+
+.tool-detail {
+  padding: 1rem 0;
+}
+
+.tool-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.detail-icon {
+  font-size: 4rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+.detail-info {
+  flex: 1;
+}
+
+.detail-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+}
+
+.detail-description {
+  color: #666;
+  margin-bottom: 0.75rem;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.detail-category {
+  padding: 0.375rem 0.75rem;
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  font-size: 0.875rem;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.detail-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #ffd700;
+}
+
+.rating-info {
+  color: #666;
+  margin-left: 0.25rem;
+}
+
+.tool-interface {
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.interface-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.interface-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-label {
+  font-weight: 500;
+  color: #555;
+  font-size: 0.875rem;
+}
+
+.tool-textarea {
+  :deep(.ant-input) {
+    border-radius: 12px !important;
+    border: 1px solid rgba(102, 126, 234, 0.2) !important;
+    
+    &:focus {
+      border-color: #667eea !important;
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2) !important;
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.process-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  font-weight: 500 !important;
+  
+  &:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4) !important;
+  }
+}
+
+.clear-btn {
+  border-radius: 12px !important;
+  border-color: rgba(102, 126, 234, 0.3) !important;
+  color: #667eea !important;
+  
+  &:hover {
+    background: rgba(102, 126, 234, 0.1) !important;
+    border-color: #667eea !important;
+    transform: translateY(-2px) !important;
+  }
 }
 </style> 

@@ -1,0 +1,62 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 前端页面结构
+
+DiFlow使用Nuxt.js的文件系统路由和Ant Design Vue UI组件库构建前端界面。
+
+## 页面目录
+
+页面文件位于 [pages/](mdc:pages) 目录下:
+
+- **主页**: [pages/index.vue](mdc:pages/index.vue)
+- **认证页面**:
+  - 登录: [pages/auth/login.vue](mdc:pages/auth/login.vue)
+  - 注册: [pages/auth/register.vue](mdc:pages/auth/register.vue)
+- **聊天页面**: [pages/chat/](mdc:pages/chat)
+- **工作流页面**: [pages/workflow/](mdc:pages/workflow)
+- **工具页面**: [pages/tools/](mdc:pages/tools)
+
+## UI组件库
+
+DiFlow使用Ant Design Vue作为UI组件库。组件库通过插件集成:
+
+```typescript
+// plugins/antd.client.ts
+import { defineNuxtPlugin } from '#app'
+import Antd from 'ant-design-vue'
+
+export default defineNuxtPlugin((nuxtApp) => {
+  nuxtApp.vueApp.use(Antd)
+})
+```
+
+UI组件库配置在 [nuxt.config.ts](mdc:nuxt.config.ts) 中:
+
+```typescript
+css: [
+  'ant-design-vue/dist/reset.css',
+  '~/assets/css/main.css'
+],
+
+plugins: [
+  '~/plugins/antd.client.ts'
+],
+
+build: {
+  transpile: ['ant-design-vue']
+},
+
+vite: {
+  ssr: {
+    noExternal: ['ant-design-vue']
+  }
+}
+```
+
+## 状态管理
+
+使用Pinia进行状态管理，存储定义在 [stores/](mdc:stores) 目录下。
+

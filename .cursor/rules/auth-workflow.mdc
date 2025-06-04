@@ -1,0 +1,47 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 认证与授权
+
+DiFlow使用JWT (JSON Web Token) 进行用户认证。
+
+## 认证流程
+
+1. 用户通过 [/api/auth/register](mdc:server/api/auth/register.post.ts) 注册账户
+2. 用户通过 [/api/auth/login](mdc:server/api/auth/login.post.ts) 登录获取JWT令牌
+3. 前端将令牌存储在本地（通常是localStorage或cookie）
+4. 后续API请求在请求头中包含令牌以验证用户身份
+
+## JWT配置
+
+JWT密钥在 [nuxt.config.ts](mdc:nuxt.config.ts) 中配置:
+
+```typescript
+runtimeConfig: {
+  // 私有环境变量（仅服务器端）
+  jwtSecret: process.env.JWT_SECRET || 'your-secret-key',
+  // ...
+}
+```
+
+## 密码处理
+
+用户密码使用 bcryptjs 库进行加密和验证:
+
+1. 注册时密码加密:
+```javascript
+import bcrypt from 'bcryptjs'
+const hashedPassword = await bcrypt.hash(password, 10)
+```
+
+2. 登录时密码验证:
+```javascript
+import bcrypt from 'bcryptjs'
+const isValidPassword = await bcrypt.compare(password, user.password)
+```
+
+## 受保护的路由
+
+需要认证的页面和API应该使用中间件检查用户是否已登录。在Nuxt中，这通常通过创建认证中间件来实现。

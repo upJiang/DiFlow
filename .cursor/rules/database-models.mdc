@@ -1,0 +1,64 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 数据库模型
+
+DiFlow使用Prisma ORM与SQLite数据库交互。[schema.prisma](mdc:prisma/schema.prisma)文件定义了应用的数据模型。
+
+## 主要模型
+
+### User模型
+用户模型存储应用用户信息。
+```prisma
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // 存储加密后的密码
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  chats     Chat[]   // 关联的聊天记录
+}
+```
+
+### Chat模型
+聊天模型存储用户的聊天历史。
+```prisma
+model Chat {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  messages  String   // 存储聊天消息的 JSON 字符串
+  model     String   @default("deepseek-chat")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+```
+
+### ModelConfig模型
+模型配置存储各种AI模型的配置信息。
+```prisma
+model ModelConfig {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  displayName String
+  apiKey      String?
+  baseUrl     String?
+  enabled     Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+```
+
+## 数据库操作
+
+在Prisma中操作数据库:
+1. 创建记录: `prisma.user.create({ data: {...} })`
+2. 查询记录: `prisma.user.findUnique({ where: { id: userId } })`
+3. 更新记录: `prisma.user.update({ where: { id: userId }, data: {...} })`
+4. 删除记录: `prisma.user.delete({ where: { id: userId } })`
+
