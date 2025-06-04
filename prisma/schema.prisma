@@ -1,0 +1,50 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  chats     Chat[]   // 用户的聊天记录
+
+  @@map("users")
+}
+
+model Chat {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  messages  String   // 存储聊天消息的 JSON 字符串
+  model     String   @default("deepseek-chat")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("chats")
+}
+
+model ModelConfig {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  displayName String
+  apiKey      String?
+  baseUrl     String?
+  enabled     Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("model_configs")
+}
