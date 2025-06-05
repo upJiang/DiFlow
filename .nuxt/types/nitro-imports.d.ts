@@ -68,11 +68,11 @@ declare global {
   const getRouterParams: typeof import('../../node_modules/h3')['getRouterParams']
   const getSession: typeof import('../../node_modules/h3')['getSession']
   const getTokenFromHeader: typeof import('../../server/utils/auth')['getTokenFromHeader']
+  const getUserFromToken: typeof import('../../server/utils/auth')['getUserFromToken']
   const getValidatedQuery: typeof import('../../node_modules/h3')['getValidatedQuery']
   const getValidatedRouterParams: typeof import('../../node_modules/h3')['getValidatedRouterParams']
   const handleCacheHeaders: typeof import('../../node_modules/h3')['handleCacheHeaders']
   const handleCors: typeof import('../../node_modules/h3')['handleCors']
-  const hashPassword: typeof import('../../server/utils/auth')['hashPassword']
   const isCorsOriginAllowed: typeof import('../../node_modules/h3')['isCorsOriginAllowed']
   const isError: typeof import('../../node_modules/h3')['isError']
   const isEvent: typeof import('../../node_modules/h3')['isEvent']
@@ -128,9 +128,15 @@ declare global {
   const useRuntimeConfig: typeof import('../../node_modules/nitropack/dist/runtime/internal/config')['useRuntimeConfig']
   const useSession: typeof import('../../node_modules/h3')['useSession']
   const useStorage: typeof import('../../node_modules/nitropack/dist/runtime/internal/storage')['useStorage']
-  const verifyPassword: typeof import('../../server/utils/auth')['verifyPassword']
+  const validateGoogleToken: typeof import('../../server/utils/auth')['validateGoogleToken']
   const verifyToken: typeof import('../../server/utils/auth')['verifyToken']
   const writeEarlyHints: typeof import('../../node_modules/h3')['writeEarlyHints']
+}
+// for type re-export
+declare global {
+  // @ts-ignore
+  export type { GoogleUserInfo, JWTUser } from '../../server/utils/auth'
+  import('../../server/utils/auth')
 }
 export { useNitroApp } from 'nitropack/runtime/internal/app';
 export { useRuntimeConfig, useAppConfig } from 'nitropack/runtime/internal/config';
@@ -144,7 +150,7 @@ export { useEvent } from 'nitropack/runtime/internal/context';
 export { defineTask, runTask } from 'nitropack/runtime/internal/task';
 export { defineNitroErrorHandler } from 'nitropack/runtime/internal/error/utils';
 export { appendCorsHeaders, appendCorsPreflightHeaders, appendHeader, appendHeaders, appendResponseHeader, appendResponseHeaders, assertMethod, callNodeListener, clearResponseHeaders, clearSession, createApp, createAppEventHandler, createError, createEvent, createEventStream, createRouter, defaultContentType, defineEventHandler, defineLazyEventHandler, defineNodeListener, defineNodeMiddleware, defineRequestMiddleware, defineResponseMiddleware, defineWebSocket, defineWebSocketHandler, deleteCookie, dynamicEventHandler, eventHandler, fetchWithEvent, fromNodeMiddleware, fromPlainHandler, fromWebHandler, getCookie, getHeader, getHeaders, getMethod, getProxyRequestHeaders, getQuery, getRequestFingerprint, getRequestHeader, getRequestHeaders, getRequestHost, getRequestIP, getRequestPath, getRequestProtocol, getRequestURL, getRequestWebStream, getResponseHeader, getResponseHeaders, getResponseStatus, getResponseStatusText, getRouterParam, getRouterParams, getSession, getValidatedQuery, getValidatedRouterParams, handleCacheHeaders, handleCors, isCorsOriginAllowed, isError, isEvent, isEventHandler, isMethod, isPreflightRequest, isStream, isWebResponse, lazyEventHandler, parseCookies, promisifyNodeListener, proxyRequest, readBody, readFormData, readMultipartFormData, readRawBody, readValidatedBody, removeResponseHeader, sanitizeStatusCode, sanitizeStatusMessage, sealSession, send, sendError, sendIterable, sendNoContent, sendProxy, sendRedirect, sendStream, sendWebResponse, serveStatic, setCookie, setHeader, setHeaders, setResponseHeader, setResponseHeaders, setResponseStatus, splitCookiesString, toEventHandler, toNodeListener, toPlainHandler, toWebHandler, toWebRequest, unsealSession, updateSession, useBase, useSession, writeEarlyHints } from 'h3';
-export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsURL } from 'D:/StudyProject/DiFlow/node_modules/nuxt/dist/core/runtime/nitro/utils/paths';
-export { defineAppConfig } from 'D:/StudyProject/DiFlow/node_modules/nuxt/dist/core/runtime/nitro/utils/config';
-export { generateToken, verifyToken, getTokenFromHeader, requireAuth, hashPassword, verifyPassword } from 'D:/StudyProject/DiFlow/server/utils/auth';
-export { prisma } from 'D:/StudyProject/DiFlow/server/utils/db';
+export { buildAssetsURL as __buildAssetsURL, publicAssetsURL as __publicAssetsURL } from '/Users/mac/Desktop/studyProject/DiFlow/node_modules/nuxt/dist/core/runtime/nitro/utils/paths';
+export { defineAppConfig } from '/Users/mac/Desktop/studyProject/DiFlow/node_modules/nuxt/dist/core/runtime/nitro/utils/config';
+export { generateToken, verifyToken, getUserFromToken, validateGoogleToken, getTokenFromHeader, requireAuth } from '/Users/mac/Desktop/studyProject/DiFlow/server/utils/auth';
+export { prisma } from '/Users/mac/Desktop/studyProject/DiFlow/server/utils/db';

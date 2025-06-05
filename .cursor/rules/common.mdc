@@ -5,4 +5,4 @@ alwaysApply: true
 ---
 请不要添加测试代码
 保证整体项目风格为卡通，主题色不变
-
+node工具使用yarn，不得使用npm

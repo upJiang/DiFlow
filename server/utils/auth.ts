@@ -1,30 +1,89 @@
 import jwt from 'jsonwebtoken'
-import bcrypt from 'bcryptjs'
-import type { User } from '~/types'
 
-const config = useRuntimeConfig()
+export interface GoogleUserInfo {
+  id: string
+  email: string
+  name?: string
+  picture?: string
+}
 
-// 生成 JWT token
-export function generateToken(user: User): string {
+export interface JWTUser {
+  id: string
+  email: string
+  name?: string
+}
+
+// JWT 配置
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
+
+// 生成 JWT Token
+export function generateToken(user: { id: string; email: string; name?: string | null }): string {
   return jwt.sign(
     { 
-      userId: user.id, 
-      username: user.username 
+      id: user.id,
+      email: user.email,
+      name: user.name 
     },
-    config.jwtSecret,
+    JWT_SECRET,
     { expiresIn: '7d' }
   )
 }
 
-// 验证 JWT token
-export function verifyToken(token: string): { userId: string; username: string } | null {
+// 验证 JWT Token
+export function verifyToken(token: string): JWTUser | null {
   try {
-    const decoded = jwt.verify(token, config.jwtSecret) as any
+    return jwt.verify(token, JWT_SECRET) as JWTUser
+  } catch (error) {
+    return null
+  }
+}
+
+// 从请求头获取用户信息
+export async function getUserFromToken(event: any): Promise<any | null> {
+  try {
+    const authorization = getHeader(event, 'authorization')
+    if (!authorization || !authorization.startsWith('Bearer ')) {
+      return null
+    }
+
+    const token = authorization.replace('Bearer ', '')
+    const decoded = verifyToken(token)
+    
+    if (!decoded || !decoded.id) {
+      return null
+    }
+
+    const { prisma } = await import('./db')
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id }
+    })
+
+    return user
+  } catch (error) {
+    console.error('获取用户信息失败:', error)
+    return null
+  }
+}
+
+// 验证 Google Access Token
+export async function validateGoogleToken(accessToken: string): Promise<GoogleUserInfo | null> {
+  try {
+    const response = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${accessToken}`)
+    
+    if (!response.ok) {
+      return null
+    }
+
+    const userInfo = await response.json()
+    
     return {
-      userId: decoded.userId,
-      username: decoded.username
+      id: userInfo.id,
+      email: userInfo.email,
+      name: userInfo.name,
+      picture: userInfo.picture
     }
   } catch (error) {
+    console.error('验证Google Token失败:', error)
     return null
   }
 }
@@ -39,7 +98,7 @@ export function getTokenFromHeader(event: any): string | null {
 }
 
 // 验证用户身份中间件
-export async function requireAuth(event: any): Promise<{ userId: string; username: string }> {
+export async function requireAuth(event: any): Promise<JWTUser> {
   const token = getTokenFromHeader(event)
   
   if (!token) {
@@ -59,15 +118,4 @@ export async function requireAuth(event: any): Promise<{ userId: string; usernam
   }
 
   return decoded
-}
-
-// 密码加密
-export async function hashPassword(password: string): Promise<string> {
-  const saltRounds = 10
-  return bcrypt.hash(password, saltRounds)
-}
-
-// 密码验证
-export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  return bcrypt.compare(password, hashedPassword)
 } 

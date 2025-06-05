@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "lsof -ti:3333 | xargs kill -9 2>/dev/null || true && nuxt dev --port 3333",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
@@ -34,13 +34,17 @@
     "vue-tsc": "^1.8.25"
   },
   "dependencies": {
+    "@nuxtjs/tailwindcss": "^7.0.0-beta.0",
     "@prisma/client": "^5.7.1",
     "ant-design-vue": "^4.0.8",
+    "autoprefixer": "^10.4.21",
     "bcryptjs": "^2.4.3",
     "h3": "^1.8.2",
     "jsonwebtoken": "^9.0.2",
     "openai": "^4.20.1",
     "pinia": "^2.1.7",
+    "postcss": "^8.5.4",
+    "tailwindcss": "^4.1.8",
     "unplugin-auto-import": "^0.17.2",
     "unplugin-vue-components": "^0.25.2",
     "vue": "^3.3.13",

@@ -7,12 +7,12 @@
     "module": true,
     "resourceType": "script"
   },
-  "D:/StudyProject/DiFlow/node_modules/nuxt/dist/app/entry.js": {
+  "/Users/mac/Desktop/studyProject/DiFlow/node_modules/nuxt/dist/app/entry.js": {
     "resourceType": "script",
     "module": true,
     "prefetch": true,
     "preload": true,
     "isEntry": true,
-    "file": "D:/StudyProject/DiFlow/node_modules/nuxt/dist/app/entry.js"
+    "file": "/Users/mac/Desktop/studyProject/DiFlow/node_modules/nuxt/dist/app/entry.js"
   }
 }

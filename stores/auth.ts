@@ -1,154 +1,120 @@
 import { defineStore } from 'pinia'
-import type { User, LoginRequest, RegisterRequest, AuthResponse } from '~/types'
+import type { User, GoogleAuthRequest, AuthResponse } from '~/types'
 
 export const useAuthStore = defineStore('auth', () => {
+  // 状态
   const user = ref<User | null>(null)
   const token = ref<string | null>(null)
-  const isLoading = ref(false)
+  const loading = ref(false)
 
+  // 计算属性
   const isAuthenticated = computed(() => !!token.value && !!user.value)
 
+  // 初始化
   const init = () => {
-    if (process.client) {
+    if (typeof window !== 'undefined') {
       const savedToken = localStorage.getItem('auth_token')
       const savedUser = localStorage.getItem('auth_user')
       
       if (savedToken && savedUser) {
         token.value = savedToken
-        user.value = JSON.parse(savedUser)
+        try {
+          user.value = JSON.parse(savedUser)
+        } catch (error) {
+          console.error('解析用户信息失败:', error)
+          logout()
+        }
       }
     }
   }
 
-  const login = async (credentials: LoginRequest): Promise<void> => {
-    isLoading.value = true
-    console.log('正在尝试登录:', credentials.username)
+  // 直接设置认证信息
+  const setAuth = (authToken: string, userData: User) => {
+    token.value = authToken
+    user.value = userData
     
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('auth_token', authToken)
+      localStorage.setItem('auth_user', JSON.stringify(userData))
+    }
+  }
+
+  // Google OAuth 登录
+  const googleLogin = async (accessToken: string): Promise<AuthResponse> => {
+    loading.value = true
     try {
-      // 调试：记录发送请求前的状态
-      console.log('发送登录请求:', {
-        url: '/api/auth/login',
+      const response = await $fetch<AuthResponse>('/api/auth/google', {
         method: 'POST',
-        body: { username: credentials.username, password: '***' }
+        body: { accessToken }
       })
-      
-      const response = await $fetch<AuthResponse>('/api/auth/login', {
-        method: 'POST',
-        body: credentials
-      })
-      
-      // 调试：记录响应
-      console.log('登录响应:', response)
 
       if (response.success && response.data) {
-        token.value = response.data.token
-        user.value = response.data.user
-        
-        if (process.client) {
-          localStorage.setItem('auth_token', response.data.token)
-          localStorage.setItem('auth_user', JSON.stringify(response.data.user))
-        }
-        console.log('登录成功，用户信息已保存')
-      } else {
-        // API返回success: false时，抛出错误并携带message
-        console.log('登录失败:', response.message)
-        const error = new Error(response.message || '登录失败')
-        // 为了保持与错误通知组件的兼容性，设置statusCode和statusMessage
-        ;(error as any).statusCode = 200
-        ;(error as any).statusMessage = response.message
-        ;(error as any).message = response.message
-        throw error
+        setAuth(response.data.token, response.data.user)
       }
+
+      return response
     } catch (error: any) {
-      // 调试：详细记录错误
-      console.error('登录错误:', error)
-      console.error('详细错误信息:', {
-        message: error.message,
-        statusCode: error.statusCode,
-        statusMessage: error.statusMessage,
-        data: error.data,
-        stack: error.stack
-      })
-      
-      // 重新抛出错误，让页面的错误处理逻辑处理
-      throw error
+      console.error('Google 登录失败:', error)
+      return {
+        success: false,
+        error: error.data?.message || '登录失败'
+      }
     } finally {
-      isLoading.value = false
+      loading.value = false
     }
   }
 
-  const register = async (credentials: RegisterRequest): Promise<void> => {
-    isLoading.value = true
-    console.log('正在尝试注册:', credentials.username)
-    
-    try {
-      // 调试：记录发送请求前的状态
-      console.log('发送注册请求:', {
-        url: '/api/auth/register',
-        method: 'POST',
-        body: { username: credentials.username, password: '***' }
-      })
-      
-      const response = await $fetch<AuthResponse>('/api/auth/register', {
-        method: 'POST',
-        body: credentials
-      })
-      
-      // 调试：记录响应
-      console.log('注册响应:', response)
-
-      if (response.success && response.data) {
-        token.value = response.data.token
-        user.value = response.data.user
-        
-        if (process.client) {
-          localStorage.setItem('auth_token', response.data.token)
-          localStorage.setItem('auth_user', JSON.stringify(response.data.user))
-        }
-        console.log('注册成功，用户信息已保存')
-      } else {
-        console.error('注册响应成功但数据无效:', response)
-        throw new Error(response.error || 'Registration failed')
-      }
-    } catch (error: any) {
-      // 调试：详细记录错误
-      console.error('注册错误:', error)
-      console.error('详细错误信息:', {
-        message: error.message,
-        data: error.data,
-        stack: error.stack
-      })
-      throw new Error(error.data?.message || error.message || 'Registration failed')
-    } finally {
-      isLoading.value = false
-    }
-  }
-
+  // 登出
   const logout = () => {
-    token.value = null
     user.value = null
+    token.value = null
     
-    if (process.client) {
+    if (typeof window !== 'undefined') {
       localStorage.removeItem('auth_token')
       localStorage.removeItem('auth_user')
     }
-    
-    navigateTo('/auth/login')
   }
 
-  const getAuthHeaders = () => {
-    return token.value ? { Authorization: `Bearer ${token.value}` } : {}
+  // 获取用户信息
+  const getCurrentUser = async () => {
+    if (!token.value) return null
+
+    try {
+      const response = await $fetch<{ success: boolean; data: User }>('/api/auth/me', {
+        headers: {
+          Authorization: `Bearer ${token.value}`
+        }
+      })
+
+      if (response.success && response.data) {
+        user.value = response.data
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('auth_user', JSON.stringify(response.data))
+        }
+      }
+
+      return response.data
+    } catch (error) {
+      console.error('获取用户信息失败:', error)
+      logout()
+      return null
+    }
   }
 
   return {
-    user: readonly(user),
-    token: readonly(token),
-    isLoading: readonly(isLoading),
+    // 状态
+    user,
+    token,
+    loading: readonly(loading),
+    
+    // 计算属性
     isAuthenticated,
+    
+    // 方法
     init,
-    login,
-    register,
+    setAuth,
+    googleLogin,
     logout,
-    getAuthHeaders
+    getCurrentUser
   }
 }) 

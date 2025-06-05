@@ -1,26 +1,21 @@
 // 用户相关类型
 export interface User {
   id: string
-  username: string
-  createdAt: string
-  updatedAt: string
+  email: string
+  name?: string
+  image?: string
 }
 
-export interface LoginRequest {
-  username: string
-  password: string
-}
-
-export interface RegisterRequest {
-  username: string
-  password: string
+// Google OAuth 相关类型
+export interface GoogleAuthRequest {
+  accessToken: string
 }
 
 export interface AuthResponse {
   success: boolean
   data?: {
-    user: User
     token: string
+    user: User
   }
   message?: string
   error?: string
@@ -31,31 +26,31 @@ export interface ChatMessage {
   id: string
   role: 'user' | 'assistant'
   content: string
-  timestamp: string
+  timestamp: Date
 }
 
 export interface Chat {
   id: string
-  userId: string
   title: string
   messages: ChatMessage[]
   model: string
-  createdAt: string
-  updatedAt: string
+  createdAt: Date
+  updatedAt: Date
 }
 
-export interface ChatRequest {
+export interface SendMessageRequest {
+  chatId?: string
   message: string
   model?: string
-  chatId?: string
 }
 
 export interface ChatResponse {
   success: boolean
   data?: {
-    message: ChatMessage
     chatId: string
+    message: ChatMessage
   }
+  message?: string
   error?: string
 }
 
@@ -67,11 +62,9 @@ export interface ModelConfig {
   apiKey?: string
   baseUrl?: string
   enabled: boolean
-  createdAt: string
-  updatedAt: string
 }
 
-// API 响应基础类型
+// API 响应格式
 export interface ApiResponse<T = any> {
   success: boolean
   data?: T
@@ -86,7 +79,7 @@ export interface PaginationParams {
 }
 
 export interface PaginatedResponse<T> {
-  data: T[]
+  items: T[]
   total: number
   page: number
   limit: number

@@ -1,86 +1,134 @@
 # DiFlow - AI 工作流平台
 
-一个类似 Dify 的 AI 工作流网站，支持对话、工作流和工具功能。
+DiFlow 是一个集成对话、工作流和工具的智能平台，采用现代化的技术栈构建，提供美观的用户界面和强大的功能。
 
-## 技术栈
+## 🚀 功能特性
 
-- **框架**: Nuxt.js 3
-- **语言**: TypeScript
-- **UI 组件库**: Ant Design Vue
+- **智能对话**: 与AI进行自然对话，支持多轮对话和历史记录
+- **工作流管理**: 可视化设计和执行自动化工作流程
+- **实用工具**: 丰富的工具集合，包括文本处理、数据分析等
+- **Google OAuth**: 安全便捷的Google账号登录
+- **响应式设计**: 支持桌面和移动设备
+- **现代化UI**: 采用卡通风格设计，视觉体验舒适
+
+## 🛠️ 技术栈
+
+- **前端**: Nuxt 3 + Vue 3 + TypeScript
+- **样式**: Tailwind CSS
 - **状态管理**: Pinia
-- **数据库**: MySQL
-- **ORM**: Prisma
-- **身份认证**: JWT
-- **AI 集成**: OpenAI API
-- **构建工具**: Vite
-- **代码规范**: ESLint + TypeScript
+- **数据库**: MySQL + Prisma ORM
+- **认证**: JWT + Google OAuth 2.0
+- **AI集成**: DeepSeek API
 
-## 项目结构
+## 📦 安装和设置
 
-```
-DiFlow/
-├── assets/              # 静态资源
-├── components/          # Vue 组件
-│   ├── common/         # 通用组件
-│   ├── chat/           # 对话组件
-│   ├── workflow/       # 工作流组件
-│   └── tools/          # 工具组件
-├── layouts/            # 布局文件
-├── middleware/         # 中间件
-├── pages/              # 页面路由
-├── plugins/            # 插件
-├── prisma/             # 数据库配置
-├── server/             # 服务端 API
-│   ├── api/            # API 路由
-│   └── utils/          # 服务端工具
-├── stores/             # Pinia 状态管理
-├── types/              # TypeScript 类型定义
-└── utils/              # 客户端工具函数
+### 1. 克隆项目
+
+```bash
+git clone <repository-url>
+cd DiFlow
 ```
 
-## 快速开始
+### 2. 安装依赖
 
-1. 安装依赖：
 ```bash
 npm install
 ```
 
-2. 配置环境变量：
+### 3. 环境配置
+
+复制环境变量示例文件：
+
 ```bash
 cp .env.example .env
-# 编辑 .env 文件，填入你的配置
 ```
 
-3. 初始化数据库：
+编辑 `.env` 文件，配置以下变量：
+
+```env
+# 数据库配置
+DATABASE_URL="mysql://username:password@localhost:3306/diflow"
+
+# JWT 密钥
+JWT_SECRET="your-jwt-secret-key-here"
+
+# Google OAuth 配置
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+
+# OpenAI API 配置 (用于 DeepSeek)
+OPENAI_API_KEY="your-deepseek-api-key"
+
+# 认证密钥
+AUTH_SECRET="your-auth-secret-key"
+```
+
+### 4. 数据库设置
+
 ```bash
-npm run db:generate
+# 推送数据库架构
 npm run db:push
+
+# 或者使用迁移
+npm run db:migrate
 ```
 
-4. 启动开发服务器：
+### 5. 启动开发服务器
+
 ```bash
 npm run dev
 ```
 
-## 功能特性
+应用将在 `http://localhost:3333` 启动。
 
-- ✅ 用户注册/登录系统
-- ✅ JWT 身份验证
-- ✅ AI 对话功能 (DeepSeek)
-- ✅ 模型选择和配置
-- 🚧 工作流设计器 (开发中)
-- 🚧 工具集成 (开发中)
+## 🔧 可用脚本
 
-## 环境变量
+- `npm run dev` - 启动开发服务器
+- `npm run build` - 构建生产版本
+- `npm run preview` - 预览生产版本
+- `npm run lint` - 运行代码检查
+- `npm run db:push` - 推送数据库架构
+- `npm run db:migrate` - 运行数据库迁移
+- `npm run db:generate` - 生成Prisma客户端
+- `npm run db:studio` - 启动Prisma Studio
 
-- `JWT_SECRET`: JWT 密钥
-- `OPENAI_API_KEY`: AI 模型 API 密钥
-- `DATABASE_URL`: 数据库连接字符串
+## 🔐 Google OAuth 设置
 
-## 开发指南
+1. 访问 [Google Cloud Console](https://console.cloud.google.com/)
+2. 创建新项目或选择现有项目
+3. 启用 Google+ API
+4. 创建 OAuth 2.0 客户端ID
+5. 设置授权重定向URI：`http://localhost:3333/auth/callback`
+6. 将客户端ID和密钥添加到 `.env` 文件
 
-请查看各个文件夹下的 README.md 文件了解具体的开发规范和使用说明。
+## 📁 项目结构
 
-## 许可证
+```
+DiFlow/
+├── components/          # Vue组件
+├── composables/         # 组合式函数
+├── pages/              # 页面路由
+├── server/             # 服务端API
+│   ├── api/            # API端点
+│   └── utils/          # 服务端工具函数
+├── stores/             # Pinia状态管理
+├── types/              # TypeScript类型定义
+├── prisma/             # 数据库架构
+└── assets/             # 静态资源
+```
+
+## 🎨 设计特色
+
+- **卡通风格**: 采用友好的卡通风格设计
+- **渐变背景**: 美观的渐变色背景
+- **毛玻璃效果**: 现代化的毛玻璃效果
+- **响应式布局**: 适配各种屏幕尺寸
+- **可折叠侧边栏**: 灵活的导航体验
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request 来改进项目。
+
+## �� 许可证
 
 MIT License
