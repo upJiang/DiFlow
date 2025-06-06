@@ -6,9 +6,9 @@ node_modules
 .env.production
 .env.staging
 
-# Nuxt生成的文件
-.nuxt
-.output
+# Next.js生成的文件
+.next
+out
 dist
 
 # 日志文件
@@ -23,3 +23,7 @@ logs
 
 # 缓存
 .cache
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
