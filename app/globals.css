@@ -37,4 +37,36 @@ a {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
-} 
+}
+
+/* Google登录按钮样式优化 */
+.google-signin-wrapper #google-signin-button > div {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  border: none !important;
+  border-radius: 16px !important;
+  transition: all 0.3s ease !important;
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #f8faff 50%,
+    #f0f4ff 100%
+  ) !important;
+  overflow: hidden !important;
+}
+
+.google-signin-wrapper:hover #google-signin-button > div {
+  transform: scale(1.02) !important;
+  box-shadow: 0 20px 40px -12px rgba(59, 130, 246, 0.2),
+    0 10px 20px -5px rgba(147, 51, 234, 0.15),
+    0 0 0 1px rgba(59, 130, 246, 0.15) !important;
+}
+
+.google-signin-wrapper #google-signin-button iframe {
+  border-radius: 16px !important;
+  transition: all 0.3s ease !important;
+}
+
+.google-signin-wrapper:hover #google-signin-button iframe {
+  transform: scale(1.02) !important;
+}

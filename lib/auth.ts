@@ -1,106 +1,92 @@
-import jwt from 'jsonwebtoken'
-import { cookies } from 'next/headers'
-import { NextRequest } from 'next/server'
+import { NextRequest } from "next/server";
+import { verify, sign } from "jsonwebtoken";
+import { User } from "@prisma/client";
 
-export interface User {
-  id: string
-  email: string
-  name: string
-  image?: string
-  googleId?: string
+// JWT密钥
+const JWT_SECRET = process.env.JWT_PRIVATE_KEY!;
+
+// 用户会话接口
+export interface UserSession {
+  userId: string;
+  email: string;
+  name?: string;
+  image?: string;
 }
 
-export interface SessionData {
-  userId: string
-  email: string
-  name: string
-}
-
-export class AuthError extends Error {
-  constructor(message: string, public statusCode = 401) {
-    super(message)
-    this.name = 'AuthError'
-  }
-}
-
-// 生成JWT token
-export function generateSessionToken(user: User): string {
-  if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET environment variable is not set')
-  }
-
-  return jwt.sign(
+/**
+ * 生成JWT访问令牌
+ * @param user 用户信息
+ * @returns JWT token
+ */
+export function generateAccessToken(user: User): string {
+  return sign(
     {
       userId: user.id,
       email: user.email,
-      name: user.name
+      name: user.name,
+      image: user.image,
     },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
-  )
+    JWT_SECRET,
+    { expiresIn: "7d" } // 7天过期
+  );
 }
 
-// 验证JWT token
-export function verifySessionToken(token: string): SessionData {
-  if (!process.env.JWT_SECRET) {
-    throw new AuthError('JWT_SECRET not configured', 500)
-  }
-
+/**
+ * 验证JWT访问令牌
+ * @param token JWT token
+ * @returns 解析后的用户会话或null
+ */
+export function verifyAccessToken(token: string): UserSession | null {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET) as any
+    const decoded = verify(token, JWT_SECRET) as any;
     return {
       userId: decoded.userId,
       email: decoded.email,
-      name: decoded.name
-    }
+      name: decoded.name,
+      image: decoded.image,
+    };
   } catch (error) {
-    throw new AuthError('Invalid session token')
+    return null;
   }
 }
 
-// 从cookies获取会话
-export function getSessionFromCookies(): SessionData | null {
+/**
+ * 从请求中获取用户会话（不强制要求认证）
+ * @param request NextRequest对象
+ * @returns 用户会话或null
+ */
+export function getSessionFromRequest(
+  request: NextRequest
+): UserSession | null {
   try {
-    const cookieStore = cookies()
-    const token = cookieStore.get('session-token')?.value
-    
+    // 从cookie中获取token
+    const token = request.cookies.get("auth-token")?.value;
+
     if (!token) {
-      return null
+      return null;
     }
 
-    return verifySessionToken(token)
+    return verifyAccessToken(token);
   } catch (error) {
-    return null
+    console.error("获取用户会话失败:", error);
+    return null;
   }
 }
 
-// 从请求获取会话
-export function getSessionFromRequest(request: NextRequest): SessionData | null {
-  try {
-    // 尝试从cookie获取
-    const token = request.cookies.get('session-token')?.value
-    
-    if (!token) {
-      // 尝试从Authorization header获取
-      const authHeader = request.headers.get('authorization')
-      if (authHeader?.startsWith('Bearer ')) {
-        const bearerToken = authHeader.substring(7)
-        return verifySessionToken(bearerToken)
-      }
-      return null
-    }
+/**
+ * 强制要求用户认证，如果未认证则抛出错误
+ * @param request NextRequest对象
+ * @returns 用户会话
+ * @throws 如果未认证则抛出错误
+ */
+export function requireAuth(request: NextRequest): UserSession {
+  const session = getSessionFromRequest(request);
 
-    return verifySessionToken(token)
-  } catch (error) {
-    return null
-  }
-}
-
-// 验证用户是否已认证（中间件用）
-export function requireAuth(request: NextRequest): SessionData {
-  const session = getSessionFromRequest(request)
   if (!session) {
-    throw new AuthError('Authentication required')
+    const error = new Error("Authentication required");
+    (error as any).statusCode = 401;
+    throw error;
   }
-  return session
-} 
+
+  return session;
+}

@@ -1,45 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionFromRequest } from "@/lib/auth";
-import { prisma } from "@/lib/db";
 
+/**
+ * 处理用户退出登录
+ * @param request - Next.js请求对象
+ * @returns 退出登录响应
+ */
 export async function POST(request: NextRequest) {
   try {
-    const session = getSessionFromRequest(request);
-
-    if (session) {
-      // 从数据库删除会话记录
-      try {
-        await prisma.session.deleteMany({
-          where: {
-            userId: session.userId,
-          },
-        });
-      } catch (dbError) {
-        console.error("删除会话记录失败:", dbError);
-        // 即使数据库操作失败，也继续清除cookie
-      }
-    }
-
-    // 创建响应并清除cookie
+    // 创建响应
     const response = NextResponse.json({
       success: true,
-      message: "Logged out successfully",
+      message: "退出登录成功",
     });
 
-    // 清除会话cookie
-    response.cookies.set("session-token", "", {
+    // 清除认证cookie
+    response.cookies.set("auth-token", "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 0, // 立即过期
+      maxAge: -1, // 立即过期
       path: "/",
     });
 
     return response;
   } catch (error) {
-    console.error("Logout error:", error);
+    console.error("退出登录错误:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { success: false, message: "退出登录失败" },
       { status: 500 }
     );
   }

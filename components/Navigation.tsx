@@ -1,78 +1,124 @@
 "use client";
 
-import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
+import { User } from "@prisma/client";
+import { useGoogleAuth } from "@/hooks/useGoogleAuth";
 
-export default function Navigation() {
-  const { isAuthenticated, user, signOut } = useAuth();
+export function Navigation() {
   const pathname = usePathname();
-  const googleButtonRef = useRef<HTMLDivElement>(null);
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      console.log("退出成功");
-    } catch (error) {
-      console.error("退出出错:", error);
-    }
-  };
+  const { isLoaded, isLoading, renderGoogleButton } = useGoogleAuth();
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const isActivePath = (path: string) => {
     return pathname === path || (path !== "/" && pathname.startsWith(path));
   };
 
+  /**
+   * 获取用户信息
+   */
+  const fetchUser = async () => {
+    try {
+      const response = await fetch("/api/auth/me");
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error("获取用户信息失败:", error);
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * 处理用户退出
+   */
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setUser(null);
+      setShowUserMenu(false);
+      window.location.reload();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
+  /**
+   * 获取用户姓名的后两位作为头像
+   * @param name 用户姓名
+   * @returns 头像文字
+   */
+  const getAvatarText = (name: string) => {
+    if (!name) return "U";
+
+    const trimmedName = name.trim();
+    if (!trimmedName) return "U";
+
+    // 对于中文名字，直接取后两个字符
+    // 对于英文名字，也取后两个字符
+    if (trimmedName.length >= 2) {
+      const lastTwoChars = trimmedName.slice(-2);
+      // 对于英文字符转大写，中文字符保持原样
+      return lastTwoChars
+        .split("")
+        .map((char) => {
+          return /[a-zA-Z]/.test(char) ? char.toUpperCase() : char;
+        })
+        .join("");
+    }
+
+    // 单个字符的情况
+    const singleChar = trimmedName.charAt(0);
+    return /[a-zA-Z]/.test(singleChar) ? singleChar.toUpperCase() : singleChar;
+  };
+
+  /**
+   * 处理点击外部区域关闭用户菜单
+   */
   useEffect(() => {
-    // 确保Google Identity Services已加载并且用户未登录
-    if (!isAuthenticated && window.google && googleButtonRef.current) {
-      console.log("初始化Google登录按钮");
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setShowUserMenu(false);
+      }
+    };
 
-      // 清空之前的按钮
-      googleButtonRef.current.innerHTML = "";
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
-      // 初始化Google Identity Services
-      window.google.accounts.id.initialize({
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-        callback: async (response) => {
-          try {
-            console.log("收到Google凭据:", response);
+  // 组件挂载时获取用户信息
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
-            // 发送凭据到服务器
-            const apiResponse = await fetch("/api/auth/google", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ credential: response.credential }),
-            });
-
-            if (apiResponse.ok) {
-              const data = await apiResponse.json();
-              console.log("登录成功:", data);
-              window.location.reload(); // 刷新页面以更新状态
-            } else {
-              const error = await apiResponse.json();
-              console.error("登录失败:", error);
-            }
-          } catch (error) {
-            console.error("处理Google登录失败:", error);
-          }
-        },
-        auto_select: false,
-        cancel_on_tap_outside: true,
-      });
-
-      // 渲染Google官方登录按钮
-      window.google.accounts.id.renderButton(googleButtonRef.current, {
+  // 当Google服务加载完成后，渲染登录按钮
+  useEffect(() => {
+    if (isLoaded && !user && !loading && buttonRef.current) {
+      renderGoogleButton("google-signin-button", {
         theme: "outline",
         size: "large",
-        text: "signin_with",
+        type: "standard",
         shape: "rectangular",
-        width: "240",
+        text: "signin_with",
+        width: "280",
       });
     }
-  }, [isAuthenticated]);
+  }, [isLoaded, user, loading, renderGoogleButton]);
 
   return (
     <nav className="bg-white/90 backdrop-blur-md shadow-lg sticky top-0 z-50">
@@ -130,20 +176,85 @@ export default function Navigation() {
             </Link>
           </div>
 
-          <div className="flex items-center">
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-3">
-                <span className="text-gray-700">欢迎, {user?.name}</span>
+          <div className="flex items-center space-x-4">
+            {loading ? (
+              <div className="w-10 h-10 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full animate-pulse"></div>
+            ) : user ? (
+              <div className="relative" ref={userMenuRef}>
+                {/* 用户头像 */}
                 <button
-                  onClick={handleLogout}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors"
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  onMouseEnter={() => setShowUserMenu(true)}
+                  className="p-1 rounded-full hover:bg-blue-50 transition-colors group"
                 >
-                  退出
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-xl transition-shadow">
+                    {getAvatarText(user.name || "")}
+                  </div>
                 </button>
+
+                {/* 用户菜单弹出层 */}
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-200 py-4 z-50">
+                    {/* 用户信息头部 */}
+                    <div className="px-6 pb-4 border-b border-gray-100">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
+                          {getAvatarText(user.name || "")}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-lg font-semibold text-gray-900 truncate">
+                            {user.name || "用户"}
+                          </p>
+                          <p className="text-sm text-gray-500 truncate">
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 退出登录 */}
+                    <div className="py-2">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-6 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center space-x-3"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                          />
+                        </svg>
+                        <span>退出登录</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
-              <div ref={googleButtonRef} className="flex items-center">
-                {/* Google按钮将在这里渲染 */}
+              <div className="flex items-center space-x-4">
+                {isLoading && (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-gray-500">登录中...</span>
+                  </div>
+                )}
+                {/* 优化后的登录按钮容器 */}
+                <div className="relative group google-signin-wrapper">
+                  <div
+                    ref={buttonRef}
+                    id="google-signin-button"
+                    className="relative overflow-hidden"
+                  />
+                  {/* 登录按钮背景光效 */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+                </div>
               </div>
             )}
           </div>
@@ -152,3 +263,5 @@ export default function Navigation() {
     </nav>
   );
 }
+
+export default Navigation;
