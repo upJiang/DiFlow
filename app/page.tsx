@@ -14,17 +14,47 @@ interface StreamingMessage {
   content: string;
 }
 
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  image?: string;
+}
+
 export default function HomePage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
-  const [selectedModel, setSelectedModel] = useState("deepseek-chat");
   const [loading, setLoading] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState<StreamingMessage>({
     content: "",
   });
   const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
+
+  // 获取用户信息
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await fetch("/api/auth/me");
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("获取用户信息失败:", error);
+        setUser(null);
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   // 检查URL中的错误参数
   useEffect(() => {
@@ -64,6 +94,10 @@ export default function HomePage() {
   };
 
   const sendExampleMessage = (message: string) => {
+    if (!user) {
+      setError("请先登录才能使用AI助手功能");
+      return;
+    }
     setInputMessage(message);
     setTimeout(() => {
       sendMessage();
@@ -71,6 +105,11 @@ export default function HomePage() {
   };
 
   const sendMessage = async () => {
+    if (!user) {
+      setError("请先登录才能使用AI助手功能");
+      return;
+    }
+
     if (!inputMessage.trim() || loading || streamingMessage.content) return;
 
     const userMessage = inputMessage.trim();
@@ -92,33 +131,77 @@ export default function HomePage() {
     }, 100);
 
     try {
-      // 模拟AI回复（实际项目中这里应该调用真实的API）
-      setLoading(false);
+      // 真实API调用
+      const response = await fetch("/api/chat-stream", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          messages: messages,
+        }),
+      });
 
-      // 模拟打字机效果
-      const aiResponse = `这是对您问题"${userMessage}"的回复。我是DiFlow AI助手，可以帮助您解决各种问题。我具有强大的学习能力和创造力，可以协助您完成编程、写作、数据分析等多种任务。`;
-
-      let currentContent = "";
-      const chars = aiResponse.split("");
-
-      for (let i = 0; i < chars.length; i++) {
-        currentContent += chars[i];
-        setStreamingMessage({ content: currentContent });
-        await new Promise((resolve) => setTimeout(resolve, 20));
+      if (response.status === 401) {
+        const errorData = await response.json();
+        setError(errorData.error || "请先登录才能使用AI助手功能");
+        setLoading(false);
+        return;
       }
 
-      // 完成流式输出后，将消息添加到正式消息列表
-      const aiMsg: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: aiResponse,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, aiMsg]);
-      setStreamingMessage({ content: "" });
+      if (!response.ok) {
+        throw new Error(`API请求失败: ${response.status}`);
+      }
+
+      setLoading(false);
+
+      // 处理流式响应
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (reader) {
+        let currentContent = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split("\n").filter((line) => line.trim() !== "");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                if (data.content) {
+                  currentContent += data.content;
+                  setStreamingMessage({ content: currentContent });
+                }
+
+                if (data.done) {
+                  // 完成流式输出后，将消息添加到正式消息列表
+                  const aiMsg: ChatMessage = {
+                    id: crypto.randomUUID(),
+                    role: "assistant",
+                    content: currentContent,
+                    timestamp: new Date(),
+                  };
+                  setMessages((prev) => [...prev, aiMsg]);
+                  setStreamingMessage({ content: "" });
+                  break;
+                }
+              } catch (e) {
+                // 忽略解析错误
+              }
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error("发送消息失败:", error);
       setLoading(false);
+      setError("发送消息失败，请重试");
     }
 
     setTimeout(() => {
@@ -142,318 +225,308 @@ export default function HomePage() {
   const adjustTextareaHeight = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = e.target;
     textarea.style.height = "auto";
-    textarea.style.height = Math.min(textarea.scrollHeight, 200) + "px";
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages, streamingMessage]);
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4 animate-spin">🎭</div>
+          <p className="text-gray-600">加载中...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      {/* 错误提示组件 */}
+    <div className="h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 overflow-hidden">
+      {/* 错误提示 */}
       {error && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-red-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3 flex-1">
-                <p className="text-sm font-medium text-red-800">登录失败</p>
-                <p className="text-sm text-red-700 mt-1">{error}</p>
-              </div>
-              <div className="ml-4 flex-shrink-0">
-                <button
-                  onClick={() => setError(null)}
-                  className="inline-flex text-red-400 hover:text-red-600 focus:outline-none"
-                >
-                  <svg
-                    className="h-4 w-4"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </div>
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-red-100 border border-red-400 text-red-700 px-6 py-3 rounded-lg shadow-lg">
+          {error}
         </div>
       )}
 
-      {/* 主内容区域 */}
-      <div className="h-full flex flex-col pt-16">
-        {/* 对话界面 */}
-        <div className="flex-1 flex flex-col">
-          {/* 对话区域 */}
-          <div ref={chatContainerRef} className="flex-1 overflow-auto p-6">
-            <div className="max-w-4xl mx-auto">
-              {/* 空状态 - 显示介绍 */}
-              {messages.length === 0 && !streamingMessage.content && (
-                <div className="flex flex-col items-center justify-center h-full text-center py-16">
-                  <div className="text-8xl mb-8">🎭</div>
-                  <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
-                    DiFlow AI 助手
-                  </h1>
-                  <div className="text-lg text-gray-600 mb-12 max-w-2xl leading-relaxed">
-                    <p className="mb-4">🌟 欢迎来到DiFlow的奇妙世界！</p>
-                    <p className="mb-4">
-                      我是你的专属AI小助手，拥有超强的学习能力和创造力！
-                    </p>
-                    <p>
-                      ✨
-                      无论是编程、写作、分析数据，还是天马行空的创意，我都能陪你一起探索！
-                    </p>
-                  </div>
+      {/* 主容器 */}
+      <div className="flex flex-col h-full pt-16">
+        {/* 聊天区域容器 */}
+        <div className="flex-1 max-w-4xl mx-auto w-full px-4 overflow-hidden">
+          <div
+            ref={chatContainerRef}
+            className="h-full pb-40 overflow-y-auto py-6 scrollbar-hide"
+            style={{
+              maxHeight: "calc(100vh - 16rem)",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+            }}
+          >
+            {/* 空状态 - 显示介绍 */}
+            {messages.length === 0 && !streamingMessage.content && (
+              <div className="flex flex-col items-center justify-center text-center py-8">
+                <div className="text-6xl mb-6 animate-bounce">🎭</div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+                  DiFlow AI 助手
+                </h1>
+                <p className="text-gray-600 mb-8 max-w-lg">
+                  ✨ 我是你的专属AI助手，可以帮助你解决各种问题！
+                </p>
 
-                  {/* 示例问题 */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
-                    <button
-                      onClick={() => sendExampleMessage("如何优化网站的SEO？")}
-                      className="group p-6 bg-gradient-to-br from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100 rounded-3xl border-2 border-blue-100 hover:border-blue-200 hover:shadow-xl transition-all text-left transform hover:scale-105"
-                    >
-                      <div className="text-3xl mb-4 group-hover:animate-bounce">
-                        🔍
-                      </div>
-                      <div className="font-bold text-gray-900 text-lg mb-2">
-                        SEO优化大师
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        让你的网站在搜索引擎中闪闪发光！
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        sendExampleMessage("帮我写一个Python数据分析脚本")
-                      }
-                      className="group p-6 bg-gradient-to-br from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 rounded-3xl border-2 border-emerald-100 hover:border-emerald-200 hover:shadow-xl transition-all text-left transform hover:scale-105"
-                    >
-                      <div className="text-3xl mb-4 group-hover:animate-bounce">
-                        🐍
-                      </div>
-                      <div className="font-bold text-gray-900 text-lg mb-2">
-                        编程魔法师
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        用代码创造无限可能，让数据说话！
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        sendExampleMessage("解释一下机器学习的基本概念")
-                      }
-                      className="group p-6 bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 rounded-3xl border-2 border-purple-100 hover:border-purple-200 hover:shadow-xl transition-all text-left transform hover:scale-105"
-                    >
-                      <div className="text-3xl mb-4 group-hover:animate-bounce">
-                        🧠
-                      </div>
-                      <div className="font-bold text-gray-900 text-lg mb-2">
-                        知识探索家
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        和我一起遨游知识的海洋吧！
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        sendExampleMessage("创建一个项目管理工作流")
-                      }
-                      className="group p-6 bg-gradient-to-br from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100 rounded-3xl border-2 border-orange-100 hover:border-orange-200 hover:shadow-xl transition-all text-left transform hover:scale-105"
-                    >
-                      <div className="text-3xl mb-4 group-hover:animate-bounce">
-                        🚀
-                      </div>
-                      <div className="font-bold text-gray-900 text-lg mb-2">
-                        效率提升器
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        让工作变得井井有条，事半功倍！
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* 消息列表 */}
-              {(messages.length > 0 || streamingMessage.content) && (
-                <div className="space-y-6 pb-32">
-                  {messages.map((message) => (
+                {/* 示例问题卡片 - 紧凑布局 */}
+                <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+                  {[
+                    {
+                      icon: "💻",
+                      title: "编程",
+                      question: "帮我写一个React组件",
+                    },
+                    { icon: "✍️", title: "写作", question: "写一首关于AI的诗" },
+                    { icon: "📊", title: "分析", question: "如何分析数据？" },
+                    { icon: "🎨", title: "设计", question: "设计网站布局" },
+                  ].map((example, index) => (
                     <div
-                      key={message.id}
-                      className={`flex items-start space-x-4 ${
+                      key={index}
+                      onClick={() => sendExampleMessage(example.question)}
+                      className="bg-white/70 backdrop-blur-sm p-4 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 border border-white/50"
+                    >
+                      <div className="text-2xl mb-2">{example.icon}</div>
+                      <h3 className="font-semibold text-gray-800 text-sm mb-1">
+                        {example.title}
+                      </h3>
+                      <p className="text-xs text-gray-600">
+                        {example.question}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 聊天消息区域 */}
+            <div className="max-w-3xl mx-auto">
+              <div className="space-y-6">
+                {messages.map((message) => (
+                  <div
+                    key={message.id}
+                    className={`flex ${
+                      message.role === "user" ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`flex ${
                         message.role === "user"
-                          ? "flex-row-reverse space-x-reverse"
-                          : ""
-                      }`}
+                          ? "flex-row-reverse"
+                          : "flex-row"
+                      } items-start space-x-3 max-w-2xl`}
                     >
                       {/* 头像 */}
-                      <div className="flex-shrink-0">
+                      <div
+                        className={`flex-shrink-0 ${
+                          message.role === "user" ? "ml-3" : "mr-3"
+                        }`}
+                      >
                         {message.role === "user" ? (
-                          <div className="w-12 h-12 bg-gradient-to-r from-slate-400 to-slate-500 rounded-2xl flex items-center justify-center text-white text-sm font-medium">
-                            <span className="whitespace-nowrap">U</span>
-                          </div>
+                          <img
+                            src={
+                              user?.image ||
+                              "https://via.placeholder.com/40x40/4F46E5/FFFFFF?text=U"
+                            }
+                            alt="用户头像"
+                            className="w-10 h-10 rounded-full border-2 border-white shadow-md object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src =
+                                "https://via.placeholder.com/40x40/4F46E5/FFFFFF?text=U";
+                            }}
+                          />
                         ) : (
-                          <div className="w-12 h-12 bg-gradient-to-r from-gray-600 to-gray-800 rounded-2xl flex items-center justify-center text-white">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 text-white flex items-center justify-center text-lg shadow-md">
                             🤖
                           </div>
                         )}
                       </div>
 
                       {/* 消息内容 */}
-                      <div className="flex-1 max-w-3xl">
-                        <div
-                          className={`p-4 rounded-2xl shadow-sm ${
-                            message.role === "user"
-                              ? "bg-gradient-to-r from-slate-100 to-slate-200 text-gray-800 border border-slate-200"
-                              : "bg-white/70 backdrop-blur-sm border border-gray-200/50"
-                          }`}
-                        >
-                          <div className="whitespace-pre-wrap break-words">
-                            {message.content}
-                          </div>
+                      <div
+                        className={`rounded-2xl px-6 py-4 shadow-lg ${
+                          message.role === "user"
+                            ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+                            : "bg-white/80 backdrop-blur-sm text-gray-800 border border-white/50"
+                        }`}
+                      >
+                        <div className="whitespace-pre-wrap break-words">
+                          {message.content}
                         </div>
                         <div
-                          className={`text-xs text-gray-500 mt-2 ${
-                            message.role === "user" ? "text-right" : ""
+                          className={`text-xs mt-2 ${
+                            message.role === "user"
+                              ? "text-blue-100"
+                              : "text-gray-500"
                           }`}
                         >
                           {formatTime(message.timestamp)}
                         </div>
                       </div>
                     </div>
-                  ))}
+                  </div>
+                ))}
 
-                  {/* 加载状态 */}
-                  {loading && (
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-gray-600 to-gray-800 rounded-2xl flex items-center justify-center text-white">
-                        🤖
+                {/* 流式消息 */}
+                {streamingMessage.content && (
+                  <div className="flex justify-start">
+                    <div className="flex flex-row items-start space-x-3 max-w-2xl">
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 text-white flex items-center justify-center text-lg shadow-md">
+                          🤖
+                        </div>
                       </div>
-                      <div className="flex-1 max-w-3xl">
-                        <div className="p-4 bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-2xl">
-                          <div className="flex items-center space-x-2">
-                            <div className="flex space-x-1">
-                              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                              <div
-                                className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                                style={{ animationDelay: "0.1s" }}
-                              ></div>
-                              <div
-                                className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                                style={{ animationDelay: "0.2s" }}
-                              ></div>
-                            </div>
+                      <div className="bg-white/80 backdrop-blur-sm text-gray-800 border border-white/50 rounded-2xl px-6 py-4 shadow-lg">
+                        <div className="whitespace-pre-wrap break-words">
+                          {streamingMessage.content}
+                        </div>
+                        <div className="flex items-center mt-2 text-gray-500">
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                            <div
+                              className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
+                              style={{ animationDelay: "0.1s" }}
+                            ></div>
+                            <div
+                              className="w-2 h-2 bg-pink-500 rounded-full animate-bounce"
+                              style={{ animationDelay: "0.2s" }}
+                            ></div>
                           </div>
+                          <span className="ml-2 text-xs">正在生成中...</span>
                         </div>
                       </div>
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {/* 流式消息（打字机效果） */}
-                  {streamingMessage.content && (
-                    <div className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-gray-600 to-gray-800 rounded-2xl flex items-center justify-center text-white">
-                        🤖
+                {/* 加载指示器 */}
+                {loading && (
+                  <div className="flex justify-start">
+                    <div className="flex flex-row items-start space-x-3 max-w-2xl">
+                      <div className="flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 text-white flex items-center justify-center text-lg shadow-md">
+                          🤖
+                        </div>
                       </div>
-                      <div className="flex-1 max-w-3xl">
-                        <div className="p-4 bg-white/70 backdrop-blur-sm border border-gray-200/50 rounded-2xl">
-                          <div className="whitespace-pre-wrap break-words">
-                            {streamingMessage.content}
-                            <span className="animate-pulse">|</span>
+                      <div className="bg-white/80 backdrop-blur-sm text-gray-800 border border-white/50 rounded-2xl px-6 py-4 shadow-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className="flex space-x-1">
+                            <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce"></div>
+                            <div
+                              className="w-3 h-3 bg-purple-500 rounded-full animate-bounce"
+                              style={{ animationDelay: "0.1s" }}
+                            ></div>
+                            <div
+                              className="w-3 h-3 bg-pink-500 rounded-full animate-bounce"
+                              style={{ animationDelay: "0.2s" }}
+                            ></div>
                           </div>
+                          <span className="text-sm text-gray-600">
+                            AI正在思考中...
+                          </span>
                         </div>
                       </div>
                     </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 输入区域 - 固定在底部 */}
+        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white/90 to-transparent backdrop-blur-md shadow-2xl">
+          <div className="max-w-4xl mx-auto p-6">
+            {/* 输入框容器 */}
+            <div
+              className="backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-4"
+              style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+            >
+              <div className="flex space-x-4">
+                <textarea
+                  value={inputMessage}
+                  onChange={(e) => {
+                    setInputMessage(e.target.value);
+                    adjustTextareaHeight(e);
+                  }}
+                  onKeyDown={handleEnter}
+                  placeholder={
+                    user ? "请输入您的问题..." : "请先登录才能使用AI助手"
+                  }
+                  rows={2}
+                  className="flex-1 resize-none border-0 bg-transparent focus:outline-none text-gray-800 placeholder-gray-500 text-sm leading-relaxed"
+                  disabled={!user || loading || !!streamingMessage.content}
+                />
+                <button
+                  onClick={sendMessage}
+                  disabled={
+                    !user ||
+                    !inputMessage.trim() ||
+                    loading ||
+                    !!streamingMessage.content
+                  }
+                  className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-md hover:shadow-lg text-sm"
+                >
+                  {loading || streamingMessage.content ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>发送</span>
+                    </div>
+                  ) : (
+                    "🚀"
                   )}
+                </button>
+              </div>
+
+              {/* 底部控制区域 */}
+              <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200/30">
+                <div className="flex items-center space-x-4">
+                  {/* 清空对话 */}
+                  <button
+                    onClick={clearChat}
+                    disabled={
+                      !user ||
+                      (messages.length === 0 && !streamingMessage.content)
+                    }
+                    className="px-3 py-1 text-gray-500 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-lg text-sm"
+                    title="清空对话"
+                  >
+                    🗑️ 清空
+                  </button>
+
+                  {/* 模型显示 */}
+                  <div className="text-xs text-gray-600 bg-white/50 px-3 py-1 rounded-lg">
+                    🧠 Qwen QwQ-32B
+                  </div>
                 </div>
-              )}
+
+                {/* 右下角提示文本 */}
+                <div className="text-xs text-gray-500">
+                  {user ? "按 Enter 发送，Shift + Enter 换行" : "请先登录"}
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 固定底部输入区域 */}
-      <div className="fixed bottom-0 left-0 right-0 p-6">
-        <div className="max-w-4xl mx-auto">
-          {/* 输入框上方的控制栏 */}
-          <div className="flex items-center justify-between mb-4">
-            {/* 左上方模型选择 */}
-            <select
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="px-4 py-2 border border-gray-300/50 rounded-xl bg-white/80 backdrop-blur-md text-sm shadow-lg hover:shadow-xl transition-all focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="deepseek-chat">💬 DeepSeek Chat</option>
-              <option value="deepseek-coder">💻 DeepSeek Coder</option>
-            </select>
-
-            {/* 右上方清空按钮 */}
-            <button
-              onClick={clearChat}
-              disabled={messages.length === 0 && !streamingMessage.content}
-              className="p-3 text-gray-500 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors bg-white/80 backdrop-blur-md rounded-xl shadow-lg hover:shadow-xl"
-              title="清空对话"
-            >
-              🗑️
-            </button>
-          </div>
-
-          {/* 输入框 */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              sendMessage();
-            }}
-            className="flex items-end space-x-4"
-          >
-            <div className="flex-1">
-              <textarea
-                value={inputMessage}
-                onChange={(e) => {
-                  setInputMessage(e.target.value);
-                  adjustTextareaHeight(e);
-                }}
-                onKeyDown={handleEnter}
-                placeholder="在这里输入消息..."
-                rows={1}
-                className="w-full p-4 border border-gray-300/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 resize-none bg-white/10 backdrop-blur-md placeholder-gray-500 shadow-lg"
-                style={{ minHeight: "56px", maxHeight: "200px" }}
-                disabled={loading || !!streamingMessage.content}
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={
-                !inputMessage.trim() || loading || !!streamingMessage.content
-              }
-              className="flex-shrink-0 p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center"
-              style={{ height: "56px", width: "56px" }}
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-              </svg>
-            </button>
-          </form>
-        </div>
-      </div>
+      <style jsx global>{`
+        .scrollbar-hide {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 }

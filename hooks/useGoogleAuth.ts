@@ -88,9 +88,7 @@ export const useGoogleAuth = () => {
    */
   const initializeGoogleAuth = () => {
     if (window.google?.accounts?.id) {
-      const clientId =
-        process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
-        "421412720168-jtvbmiha8scdt4j4aek7tsurv3468ull.apps.googleusercontent.com";
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
       window.google.accounts.id.initialize({
         client_id: clientId,
