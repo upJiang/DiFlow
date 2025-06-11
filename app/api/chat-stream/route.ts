@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verifyAccessToken } from "@/lib/auth";
+import jwt from "jsonwebtoken";
+
+// 强制动态路由
+export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {
     // 验证用户登录状态
-    const cookieStore = cookies();
-    const token = cookieStore.get("auth-token")?.value;
+    const token = request.cookies.get("auth-token")?.value;
 
     if (!token) {
       return NextResponse.json(
@@ -17,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     // 验证JWT token
     try {
-      await verifyAccessToken(token);
+      jwt.verify(token, process.env.JWT_SECRET!);
     } catch (error) {
       return NextResponse.json(
         { error: "登录已过期，请重新登录" },

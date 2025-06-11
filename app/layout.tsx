@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
+import { ToastProvider } from "@/components/ui/ToastContainer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,8 +26,10 @@ export default function RootLayout({
         ></script>
       </head>
       <body className={`${inter.className} antialiased`}>
-        <Navigation />
-        {children}
+        <ToastProvider>
+          <Navigation />
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );

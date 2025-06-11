@@ -3,7 +3,15 @@ import { verify, sign } from "jsonwebtoken";
 import { User } from "@prisma/client";
 
 // JWT密钥
-const JWT_SECRET = process.env.JWT_PRIVATE_KEY!;
+const JWT_SECRET = process.env.JWT_PRIVATE_KEY;
+
+if (!JWT_SECRET) {
+  console.error("JWT_PRIVATE_KEY 环境变量未设置");
+  throw new Error("JWT_PRIVATE_KEY 环境变量未设置");
+}
+
+// 确保JWT_SECRET是字符串类型
+const JWT_KEY = JWT_SECRET as string;
 
 // 用户会话接口
 export interface UserSession {
@@ -26,7 +34,7 @@ export function generateAccessToken(user: User): string {
       name: user.name,
       image: user.image,
     },
-    JWT_SECRET,
+    JWT_KEY,
     { expiresIn: "7d" } // 7天过期
   );
 }
@@ -38,7 +46,7 @@ export function generateAccessToken(user: User): string {
  */
 export function verifyAccessToken(token: string): UserSession | null {
   try {
-    const decoded = verify(token, JWT_SECRET) as any;
+    const decoded = verify(token, JWT_KEY) as any;
     return {
       userId: decoded.userId,
       email: decoded.email,
@@ -90,3 +98,17 @@ export function requireAuth(request: NextRequest): UserSession {
 
   return session;
 }
+
+// NextAuth配置（用于兼容）
+export const authOptions = {
+  providers: [],
+  callbacks: {
+    async session({ session, token }: any) {
+      return session;
+    },
+    async jwt({ token, user }: any) {
+      return token;
+    },
+  },
+  secret: JWT_KEY,
+};

@@ -136,33 +136,43 @@ export function Navigation() {
           <div className="hidden md:flex items-center space-x-8">
             <Link
               href="/"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActivePath("/")
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-700 hover:text-blue-600"
+              className={`nav-link relative px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg ${
+                pathname === "/"
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
               }`}
             >
-              对话
+              💬 对话
             </Link>
             <Link
               href="/workflow"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActivePath("/workflow")
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-700 hover:text-blue-600"
+              className={`nav-link relative px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg ${
+                pathname === "/workflow"
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
               }`}
             >
-              工作流
+              🔄 工作流
+            </Link>
+            <Link
+              href="/cursor-mcp"
+              className={`nav-link relative px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg ${
+                pathname === "/cursor-mcp"
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+              }`}
+            >
+              🎯 Cursor & MCP
             </Link>
             <Link
               href="/tools"
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                isActivePath("/tools")
-                  ? "bg-blue-100 text-blue-700"
-                  : "text-gray-700 hover:text-blue-600"
+              className={`nav-link relative px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg ${
+                pathname === "/tools"
+                  ? "text-blue-600 bg-blue-50"
+                  : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
               }`}
             >
-              工具
+              🛠️ 提效工具
             </Link>
           </div>
 
