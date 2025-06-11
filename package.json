@@ -3,9 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build": "next build",
+    "build": "prisma generate && next build",
     "dev": "lsof -ti:3333 | xargs kill -9 2>/dev/null || true && next dev -p 3333",
     "start": "next start",
+    "postinstall": "prisma generate",
     "preview": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
@@ -24,7 +25,7 @@
     "@types/react-dom": "^18.3.0",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.0.0",
-    "prisma": "^5.7.1",
+    
     "sass": "^1.89.1",
     "typescript": "^5.7.2"
   },
@@ -60,6 +61,7 @@
     "styled-components": "^6.1.18",
     "tailwindcss": "^3.4.0",
     "uuid": "^11.1.0",
+    "prisma": "^5.7.1",
     "zod": "^3.25.56"
   }
 }
