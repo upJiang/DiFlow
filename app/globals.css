@@ -359,3 +359,103 @@ a {
     background-position: 100% 50%;
   }
 }
+
+/* 流星动画效果 */
+@keyframes meteor {
+  0% {
+    opacity: 0;
+    transform: translate(-50px, 50px) rotate(45deg) scale(0);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(-30px, 30px) rotate(45deg) scale(1);
+  }
+  90% {
+    opacity: 1;
+    transform: translate(calc(100vw + 50px), calc(-100vh - 50px)) rotate(45deg)
+      scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(100vw + 100px), calc(-100vh - 100px))
+      rotate(45deg) scale(0);
+  }
+}
+
+.animate-meteor {
+  animation: meteor 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  position: relative;
+}
+
+.animate-meteor::before {
+  content: "";
+  position: absolute;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.9),
+    rgba(59, 130, 246, 0.8),
+    transparent
+  );
+  border-radius: 1px;
+  transform: translateX(-50px);
+}
+
+.animate-meteor::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(59, 130, 246, 0.9) 50%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.9),
+    0 0 30px rgba(255, 255, 255, 0.7);
+}
+
+.meteor-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.meteor-tail {
+  position: absolute;
+  width: 100px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.8),
+    rgba(59, 130, 246, 0.6),
+    transparent
+  );
+  transform: translate(-50%, -50%);
+  border-radius: 1px;
+}
+
+.meteor-head {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(59, 130, 246, 0.8) 50%,
+    transparent 100%
+  );
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.8),
+    0 0 20px rgba(255, 255, 255, 0.6);
+}

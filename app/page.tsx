@@ -32,6 +32,7 @@ export default function HomePage() {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [showChatBox, setShowChatBox] = useState(false);
+  const [showMeteor, setShowMeteor] = useState(false);
 
   /**
    * 获取用户信息
@@ -55,6 +56,14 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchUser();
+
+    // 流星动画定时器
+    const interval = setInterval(() => {
+      setShowMeteor(true);
+      setTimeout(() => setShowMeteor(false), 1500); // 动画持续1.5秒
+    }, 5000); // 每5秒触发一次
+
+    return () => clearInterval(interval);
   }, []);
 
   if (authLoading) {
@@ -98,6 +107,11 @@ export default function HomePage() {
         <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent opacity-30 animate-pulse animation-delay-2000"></div>
         <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-transparent via-pink-400 to-transparent opacity-20 animate-pulse animation-delay-1000"></div>
         <div className="absolute right-0 top-0 w-1 h-full bg-gradient-to-b from-transparent via-cyan-400 to-transparent opacity-20 animate-pulse animation-delay-3000"></div>
+
+        {/* 流星动画 */}
+        {showMeteor && (
+          <div className="absolute bottom-0 left-0 w-2 h-2 bg-gradient-to-r from-white via-blue-400 to-transparent rounded-full opacity-80 animate-meteor"></div>
+        )}
       </div>
 
       <Suspense fallback={null}>
@@ -115,7 +129,7 @@ export default function HomePage() {
       )}
 
       {/* 主要内容 */}
-      <div className="container mx-auto px-4 py-12 relative z-10">
+      <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
         {/* 头部标题 */}
         <div className="text-center mb-16">
           <div className="inline-block mb-6 relative">
@@ -163,7 +177,7 @@ export default function HomePage() {
         </div>
 
         {/* 功能特色卡片 */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-blue-200 hover:-translate-y-3 animate-card-up">
             <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
               🤖
@@ -196,48 +210,42 @@ export default function HomePage() {
             </p>
           </div>
         </div>
-
-        {/* 快速开始区域 */}
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-white text-2xl mb-4 animate-bounce-gentle">
-            ✨
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">
-            开始你的AI之旅
-          </h2>
-          <p className="text-gray-600 mb-8">
-            点击右下角的对话按钮，立即体验AI智能助手
-          </p>
-        </div>
       </div>
 
       {/* 悬浮对话按钮 */}
       {user && (
-        <button
-          onClick={() => setShowChatBox(!showChatBox)}
-          className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full shadow-2xl hover:shadow-blue-500/25 hover:scale-110 transition-all duration-300 flex items-center justify-center group z-50 animate-float"
-          title="快速对话"
-        >
-          <svg
-            className="w-7 h-7 group-hover:scale-110 transition-transform"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+        <div className="fixed bottom-6 right-6 flex flex-col items-center z-50">
+          <button
+            onClick={() => setShowChatBox(!showChatBox)}
+            className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full shadow-2xl hover:shadow-blue-500/25 hover:scale-110 transition-all duration-300 flex items-center justify-center group animate-float mb-2"
+            title="快速对话"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-            />
-          </svg>
+            <svg
+              className="w-7 h-7 group-hover:scale-110 transition-transform"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+              />
+            </svg>
 
-          {/* 文案提示 */}
-          <div className="absolute right-full mr-4 bg-gray-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            {/* 悬停提示 */}
+            <div className="absolute right-full mr-4 bg-gray-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              快速对话
+              <div className="absolute top-1/2 left-full w-0 h-0 border-l-4 border-l-gray-800 border-y-4 border-y-transparent transform -translate-y-1/2"></div>
+            </div>
+          </button>
+
+          {/* 按钮下方文案 */}
+          <span className="text-xs text-gray-600 font-medium bg-white/80 backdrop-blur-sm px-2 py-1 rounded-lg shadow-sm">
             快速对话
-            <div className="absolute top-1/2 left-full w-0 h-0 border-l-4 border-l-gray-800 border-y-4 border-y-transparent transform -translate-y-1/2"></div>
-          </div>
-        </button>
+          </span>
+        </div>
       )}
 
       {/* ChatBox组件 */}
@@ -247,7 +255,7 @@ export default function HomePage() {
           sessionId="homepage-chat"
           onClose={() => setShowChatBox(false)}
           isModal={true}
-          height="h-[600px]"
+          height="h-[70vh]"
         />
       )}
     </div>
