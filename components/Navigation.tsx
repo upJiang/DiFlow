@@ -135,44 +135,39 @@ export function Navigation() {
 
           <div className="hidden md:flex items-center space-x-8">
             <Link
-              href="/"
-              className={`nav-link relative px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg ${
-                pathname === "/"
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+              href="/chat"
+              className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                pathname === "/chat"
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
               }`}
             >
-              💬 对话
+              <span className="text-xl">🤖</span>
+              <span className="font-medium">AI对话</span>
             </Link>
-            <Link
-              href="/workflow"
-              className={`nav-link relative px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg ${
-                pathname === "/workflow"
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
-              }`}
-            >
-              🔄 工作流
-            </Link>
+
             <Link
               href="/cursor-mcp"
-              className={`nav-link relative px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg ${
+              className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 pathname === "/cursor-mcp"
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
               }`}
             >
-              🎯 Cursor & MCP
+              <span className="text-xl">🎯</span>
+              <span className="font-medium">Cursor & MCP</span>
             </Link>
+
             <Link
               href="/tools"
-              className={`nav-link relative px-3 py-2 text-sm font-medium transition-all duration-300 rounded-lg ${
+              className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 pathname === "/tools"
-                  ? "text-blue-600 bg-blue-50"
-                  : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
               }`}
             >
-              🛠️ 提效工具
+              <span className="text-xl">🛠️</span>
+              <span className="font-medium">效率工具</span>
             </Link>
           </div>
 

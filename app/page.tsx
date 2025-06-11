@@ -69,14 +69,31 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
+      {/* 背景动画元素 */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -left-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-40 left-20 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+
+        {/* 浮动粒子 */}
+        <div className="absolute top-1/4 left-1/4 w-4 h-4 bg-blue-400 rounded-full opacity-20 animate-float"></div>
+        <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-purple-400 rounded-full opacity-30 animate-float animation-delay-1000"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-3 h-3 bg-pink-400 rounded-full opacity-25 animate-float animation-delay-2000"></div>
+        <div className="absolute top-1/2 right-1/3 w-2 h-2 bg-indigo-400 rounded-full opacity-40 animate-float animation-delay-3000"></div>
+
+        {/* 几何图形 */}
+        <div className="absolute top-20 right-20 w-20 h-20 border-2 border-blue-300 rounded-lg opacity-20 animate-spin-slow"></div>
+        <div className="absolute bottom-20 left-20 w-16 h-16 border-2 border-purple-300 transform rotate-45 opacity-20 animate-pulse"></div>
+      </div>
+
       <Suspense fallback={null}>
         <SearchParamsHandler setError={setError} />
       </Suspense>
 
       {/* 错误消息 */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6 mx-4 mt-4">
+        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg mb-6 mx-4 mt-4 relative z-10">
           <div className="flex items-center">
             <span className="text-red-500 mr-2">⚠️</span>
             <span>{error}</span>
@@ -85,26 +102,37 @@ export default function HomePage() {
       )}
 
       {/* 主要内容 */}
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-12 relative z-10">
         {/* 头部标题 */}
         <div className="text-center mb-16">
           <div className="inline-block mb-6">
-            <div className="text-8xl mb-4 animate-bounce">⚡</div>
+            <div className="text-8xl mb-4 animate-glow">
+              <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                🔮
+              </span>
+            </div>
           </div>
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
+          <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-6 animate-slide-up">
             DiFlow AI 工作台
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            一站式AI智能工作平台，集成先进的AI对话、文档智能分析、工作流自动化和效率工具，
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed animate-fade-in-delay">
+            一站式AI智能工作平台，集成先进的AI对话、文档智能分析和效率工具，
             <br />
             助力程序员和知识工作者提升工作效率，让智能化工作触手可及。
           </p>
+
+          {/* 科技感装饰线条 */}
+          <div className="mt-8 flex justify-center items-center space-x-4">
+            <div className="w-20 h-0.5 bg-gradient-to-r from-transparent to-blue-500 animate-pulse"></div>
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+            <div className="w-20 h-0.5 bg-gradient-to-l from-transparent to-purple-500 animate-pulse animation-delay-1000"></div>
+          </div>
         </div>
 
         {/* 功能特色卡片 */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-          <div className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-blue-200 hover:-translate-y-2">
-            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-blue-200 hover:-translate-y-3 animate-card-up">
+            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
               🤖
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-3">AI智能对话</h3>
@@ -113,20 +141,8 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-purple-200 hover:-translate-y-2">
-            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">
-              🔄
-            </div>
-            <h3 className="text-xl font-bold text-gray-800 mb-3">
-              工作流自动化
-            </h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              可视化拖拽式工作流设计，支持节点连接，数据流转，让复杂任务自动化执行
-            </p>
-          </div>
-
-          <div className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-green-200 hover:-translate-y-2">
-            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">
+          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-green-200 hover:-translate-y-3 animate-card-up animation-delay-200">
+            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
               🎯
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-3">
@@ -137,8 +153,8 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="group bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-orange-200 hover:-translate-y-2">
-            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">
+          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-orange-200 hover:-translate-y-3 animate-card-up animation-delay-400">
+            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
               🛠️
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-3">效率工具集</h3>
@@ -148,116 +164,55 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* 使用统计 */}
-        <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 mb-16">
-          <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
-            📊 平台数据概览
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                1,234+
-              </div>
-              <div className="text-gray-600 text-sm">活跃用户</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-2">
-                5,678+
-              </div>
-              <div className="text-gray-600 text-sm">对话会话</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-                2,345+
-              </div>
-              <div className="text-gray-600 text-sm">工作流创建</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-2">
-                98.5%
-              </div>
-              <div className="text-gray-600 text-sm">用户满意度</div>
-            </div>
+        {/* 快速开始区域 */}
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-white text-2xl mb-4 animate-bounce-gentle">
+            ✨
           </div>
-        </div>
-
-        {/* 最新更新 */}
-        <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-          <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
-            🎉 最新功能更新
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            开始你的AI之旅
           </h2>
-          <div className="space-y-4">
-            <div className="flex items-start space-x-4 p-4 bg-blue-50 rounded-xl">
-              <div className="text-2xl">🤖</div>
-              <div>
-                <h3 className="font-semibold text-gray-800">
-                  AI对话系统重大升级
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  新增文档上传分析功能，支持PDF、Word、Markdown等多种格式，智能向量化存储，基于文档内容进行精准问答
-                </p>
-                <span className="text-xs text-blue-600 font-medium">
-                  2024-01-15
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-start space-x-4 p-4 bg-purple-50 rounded-xl">
-              <div className="text-2xl">🔄</div>
-              <div>
-                <h3 className="font-semibold text-gray-800">
-                  工作流编辑器正式上线
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  全新可视化工作流设计器，支持拖拽节点，连接数据流，自动化执行复杂任务，提升工作效率
-                </p>
-                <span className="text-xs text-purple-600 font-medium">
-                  2024-01-10
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-start space-x-4 p-4 bg-green-50 rounded-xl">
-              <div className="text-2xl">🎯</div>
-              <div>
-                <h3 className="font-semibold text-gray-800">
-                  Cursor IDE 使用指南发布
-                </h3>
-                <p className="text-sm text-gray-600 mt-1">
-                  全面的Cursor使用技巧和MCP协议应用指南，帮助开发者最大化利用AI编程助手的能力
-                </p>
-                <span className="text-xs text-green-600 font-medium">
-                  2024-01-05
-                </span>
-              </div>
-            </div>
-          </div>
+          <p className="text-gray-600 mb-8">
+            点击右下角的对话按钮，立即体验AI智能助手
+          </p>
         </div>
       </div>
 
-      {/* 悬浮快速对话按钮 */}
+      {/* 悬浮对话按钮 */}
       {user && (
         <button
-          onClick={() => setShowChatBox(true)}
-          className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center justify-center text-2xl hover:scale-110 z-40 animate-pulse hover:animate-none group"
+          onClick={() => setShowChatBox(!showChatBox)}
+          className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full shadow-2xl hover:shadow-blue-500/25 hover:scale-110 transition-all duration-300 flex items-center justify-center group z-50 animate-float"
           title="快速对话"
         >
-          <span className="group-hover:scale-125 transition-transform">💬</span>
-          <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold animate-bounce">
-            AI
+          <svg
+            className="w-7 h-7 group-hover:scale-110 transition-transform"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+            />
+          </svg>
+
+          {/* 文案提示 */}
+          <div className="absolute right-full mr-4 bg-gray-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            快速对话
+            <div className="absolute top-1/2 left-full w-0 h-0 border-l-4 border-l-gray-800 border-y-4 border-y-transparent transform -translate-y-1/2"></div>
           </div>
         </button>
       )}
 
-      {/* ChatBox 模态框 */}
-      {showChatBox && (
+      {/* ChatBox组件 */}
+      {showChatBox && user && (
         <ChatBox
           user={user}
-          onError={setError}
-          onClose={() => setShowChatBox(false)}
           sessionId="homepage-chat"
-          height="h-[80vh]"
-          isModal={true}
+          onClose={() => setShowChatBox(false)}
         />
       )}
     </div>
