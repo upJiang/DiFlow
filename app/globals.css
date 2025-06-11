@@ -71,7 +71,7 @@ a {
   transform: scale(1.02) !important;
 }
 
-/* 自定义动画 */
+/* 动画效果 */
 @keyframes blob {
   0% {
     transform: translate(0px, 0px) scale(1);
@@ -109,10 +109,20 @@ a {
 @keyframes glow {
   0%,
   100% {
-    filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.5));
+    text-shadow: 0 0 20px rgba(59, 130, 246, 0.5),
+      0 0 30px rgba(147, 51, 234, 0.5), 0 0 40px rgba(236, 72, 153, 0.5);
+  }
+  25% {
+    text-shadow: 0 0 30px rgba(147, 51, 234, 0.7),
+      0 0 40px rgba(236, 72, 153, 0.7), 0 0 50px rgba(59, 130, 246, 0.7);
   }
   50% {
-    filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.7));
+    text-shadow: 0 0 40px rgba(236, 72, 153, 0.9),
+      0 0 50px rgba(59, 130, 246, 0.9), 0 0 60px rgba(147, 51, 234, 0.9);
+  }
+  75% {
+    text-shadow: 0 0 30px rgba(59, 130, 246, 0.7),
+      0 0 40px rgba(147, 51, 234, 0.7), 0 0 50px rgba(236, 72, 153, 0.7);
   }
 }
 
@@ -139,7 +149,7 @@ a {
 @keyframes card-up {
   from {
     opacity: 0;
-    transform: translateY(50px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -157,6 +167,55 @@ a {
   }
 }
 
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3),
+      0 0 40px rgba(147, 51, 234, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6),
+      0 0 60px rgba(147, 51, 234, 0.4);
+  }
+}
+
+@keyframes float-x {
+  0%,
+  100% {
+    transform: translateX(0px);
+  }
+  50% {
+    transform: translateX(20px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes rotate-scale {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(90deg) scale(1.1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1);
+  }
+  75% {
+    transform: rotate(270deg) scale(0.9);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
 .animate-blob {
   animation: blob 7s infinite;
 }
@@ -165,8 +224,12 @@ a {
   animation: float 6s ease-in-out infinite;
 }
 
+.animate-float-x {
+  animation: float-x 4s ease-in-out infinite;
+}
+
 .animate-spin-slow {
-  animation: spin-slow 20s linear infinite;
+  animation: spin-slow 8s linear infinite;
 }
 
 .animate-glow {
@@ -178,7 +241,7 @@ a {
 }
 
 .animate-fade-in-delay {
-  animation: fade-in-delay 1s ease-out 0.3s both;
+  animation: fade-in-delay 1s ease-out 0.5s both;
 }
 
 .animate-card-up {
@@ -189,14 +252,19 @@ a {
   animation: bounce-gentle 2s ease-in-out infinite;
 }
 
-.animation-delay-200 {
-  animation-delay: 0.2s;
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }
 
-.animation-delay-400 {
-  animation-delay: 0.4s;
+.animate-shimmer {
+  animation: shimmer 2s linear infinite;
 }
 
+.animate-rotate-scale {
+  animation: rotate-scale 10s ease-in-out infinite;
+}
+
+/* 动画延迟 */
 .animation-delay-1000 {
   animation-delay: 1s;
 }
@@ -213,35 +281,81 @@ a {
   animation-delay: 4s;
 }
 
+.animation-delay-5000 {
+  animation-delay: 5s;
+}
+
+.animation-delay-6000 {
+  animation-delay: 6s;
+}
+
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
+
+.animation-delay-600 {
+  animation-delay: 0.6s;
+}
+
+.animation-delay-800 {
+  animation-delay: 0.8s;
+}
+
 /* 玻璃拟态效果 */
-.glass {
+.glassmorphism {
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-/* 导航链接样式 */
-.nav-link {
-  position: relative;
-  overflow: hidden;
+/* 导航链接悬停效果 */
+.nav-link-hover:hover {
+  background: linear-gradient(
+    45deg,
+    rgba(59, 130, 246, 0.1),
+    rgba(147, 51, 234, 0.1)
+  );
+  transform: translateY(-2px);
 }
 
-.nav-link::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
+/* 流光效果 */
+.shimmer-bg {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.4),
     transparent
   );
-  transition: left 0.5s;
+  background-size: 200% 100%;
 }
 
-.nav-link:hover::before {
-  left: 100%;
+/* 霓虹边框效果 */
+.neon-border {
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.5), 0 0 10px rgba(147, 51, 234, 0.3),
+    0 0 15px rgba(236, 72, 153, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+/* 渐变文字效果 */
+.gradient-text {
+  background: linear-gradient(45deg, #3b82f6, #9333ea, #ec4899, #06b6d4);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 4s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }

@@ -505,7 +505,7 @@ export default function ChatBox({
                 <div
                   className={`flex ${
                     message.role === "user" ? "flex-row-reverse" : "flex-row"
-                  } items-start space-x-2 max-w-[80%]`}
+                  } items-start space-x-3 max-w-[80%]`}
                 >
                   <div className="flex-shrink-0">
                     {message.role === "user" ? (
@@ -522,8 +522,8 @@ export default function ChatBox({
                   <div
                     className={`rounded-2xl px-4 py-2 shadow-sm ${
                       message.role === "user"
-                        ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white ml-2"
-                        : "bg-gray-100 text-gray-800 mr-2"
+                        ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white mr-3"
+                        : "bg-gray-100 text-gray-800 ml-3"
                     }`}
                   >
                     <div className="whitespace-pre-wrap break-words text-sm">

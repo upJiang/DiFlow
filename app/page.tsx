@@ -82,9 +82,22 @@ export default function HomePage() {
         <div className="absolute bottom-1/4 left-1/3 w-3 h-3 bg-pink-400 rounded-full opacity-25 animate-float animation-delay-2000"></div>
         <div className="absolute top-1/2 right-1/3 w-2 h-2 bg-indigo-400 rounded-full opacity-40 animate-float animation-delay-3000"></div>
 
+        {/* 更多浮动粒子 */}
+        <div className="absolute top-3/4 left-1/2 w-1 h-1 bg-cyan-400 rounded-full opacity-50 animate-float animation-delay-4000"></div>
+        <div className="absolute top-1/5 left-2/3 w-3 h-3 bg-emerald-400 rounded-full opacity-30 animate-float animation-delay-5000"></div>
+        <div className="absolute bottom-1/3 right-1/5 w-2 h-2 bg-yellow-400 rounded-full opacity-35 animate-float animation-delay-6000"></div>
+
         {/* 几何图形 */}
         <div className="absolute top-20 right-20 w-20 h-20 border-2 border-blue-300 rounded-lg opacity-20 animate-spin-slow"></div>
         <div className="absolute bottom-20 left-20 w-16 h-16 border-2 border-purple-300 transform rotate-45 opacity-20 animate-pulse"></div>
+        <div className="absolute top-1/2 left-10 w-12 h-12 border-2 border-pink-300 rounded-full opacity-15 animate-ping animation-delay-2000"></div>
+        <div className="absolute bottom-1/3 right-10 w-8 h-8 bg-gradient-to-r from-blue-300 to-purple-300 rounded-full opacity-20 animate-bounce animation-delay-3000"></div>
+
+        {/* 流动光效 */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-30 animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-purple-400 to-transparent opacity-30 animate-pulse animation-delay-2000"></div>
+        <div className="absolute left-0 top-0 w-1 h-full bg-gradient-to-b from-transparent via-pink-400 to-transparent opacity-20 animate-pulse animation-delay-1000"></div>
+        <div className="absolute right-0 top-0 w-1 h-full bg-gradient-to-b from-transparent via-cyan-400 to-transparent opacity-20 animate-pulse animation-delay-3000"></div>
       </div>
 
       <Suspense fallback={null}>
@@ -105,11 +118,31 @@ export default function HomePage() {
       <div className="container mx-auto px-4 py-12 relative z-10">
         {/* 头部标题 */}
         <div className="text-center mb-16">
-          <div className="inline-block mb-6">
-            <div className="text-8xl mb-4 animate-glow">
-              <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                🔮
-              </span>
+          <div className="inline-block mb-6 relative">
+            <div className="text-8xl mb-4 animate-glow relative">
+              {/* 主logo */}
+              <div className="relative inline-block">
+                <span className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
+                  ⚡
+                </span>
+                {/* 发光效果 */}
+                <div className="absolute inset-0 text-8xl blur-xl opacity-50 animate-ping">
+                  <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    ⚡
+                  </span>
+                </div>
+                {/* 旋转光环 */}
+                <div className="absolute -inset-4 rounded-full opacity-30 animate-spin-slow">
+                  <div className="w-full h-full rounded-full bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 p-0.5">
+                    <div className="w-full h-full rounded-full bg-white/90"></div>
+                  </div>
+                </div>
+                <div className="absolute -inset-6 rounded-full opacity-20 animate-spin-slow animation-delay-1000">
+                  <div className="w-full h-full rounded-full bg-gradient-to-r from-pink-400 via-blue-400 to-purple-400 p-0.5">
+                    <div className="w-full h-full rounded-full bg-white/90"></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-6 animate-slide-up">
@@ -214,6 +247,7 @@ export default function HomePage() {
           sessionId="homepage-chat"
           onClose={() => setShowChatBox(false)}
           isModal={true}
+          height="h-[600px]"
         />
       )}
     </div>
