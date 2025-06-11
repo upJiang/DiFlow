@@ -135,18 +135,6 @@ export function Navigation() {
 
           <div className="hidden md:flex items-center space-x-8">
             <Link
-              href="/chat"
-              className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                pathname === "/chat"
-                  ? "bg-blue-600 text-white shadow-lg"
-                  : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-              }`}
-            >
-              <span className="text-xl">🤖</span>
-              <span className="font-medium">AI对话</span>
-            </Link>
-
-            <Link
               href="/cursor-mcp"
               className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                 pathname === "/cursor-mcp"

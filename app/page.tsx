@@ -213,6 +213,7 @@ export default function HomePage() {
           user={user}
           sessionId="homepage-chat"
           onClose={() => setShowChatBox(false)}
+          isModal={true}
         />
       )}
     </div>
