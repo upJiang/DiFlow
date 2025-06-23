@@ -180,7 +180,7 @@ export default function HomePage() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-blue-200 hover:-translate-y-3 animate-card-up">
             <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
-              🤖
+              ⚡️
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-3">AI智能对话</h3>
             <p className="text-gray-600 text-sm leading-relaxed">

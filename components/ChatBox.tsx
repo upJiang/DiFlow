@@ -416,7 +416,7 @@ export default function ChatBox({
         <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-2xl">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 text-white flex items-center justify-center text-lg">
-              🤖
+              ⚡️
             </div>
             <div>
               <h3 className="font-semibold text-gray-800">DiFlow AI</h3>
@@ -514,7 +514,7 @@ export default function ChatBox({
                       </div>
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 text-white flex items-center justify-center text-lg">
-                        🤖
+                        ⚡️
                       </div>
                     )}
                   </div>
@@ -525,6 +525,9 @@ export default function ChatBox({
                         ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white mr-3"
                         : "bg-gray-100 text-gray-800 ml-3"
                     }`}
+                    style={{
+                      marginRight: message.role === "user" ? "10px" : "0px",
+                    }}
                   >
                     <div className="whitespace-pre-wrap break-words text-sm">
                       {message.content}
@@ -555,7 +558,7 @@ export default function ChatBox({
             <div className="flex justify-start">
               <div className="flex flex-row items-start space-x-2 max-w-[80%]">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 text-white flex items-center justify-center text-lg">
-                  🤖
+                  ⚡️
                 </div>
                 <div className="bg-gray-100 text-gray-800 rounded-2xl px-4 py-2 shadow-sm mr-2">
                   <div className="whitespace-pre-wrap break-words text-sm">
@@ -607,7 +610,7 @@ export default function ChatBox({
             <div className="flex justify-start">
               <div className="flex flex-row items-start space-x-2">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 text-white flex items-center justify-center text-lg">
-                  🤖
+                  ⚡️
                 </div>
                 <div className="bg-gray-100 text-gray-800 rounded-2xl px-4 py-2 shadow-sm">
                   <div className="flex items-center space-x-2">

@@ -23,7 +23,7 @@ const AVAILABLE_MODELS: ModelConfig[] = [
   {
     provider: "siliconflow",
     name: "deepseek-ai/DeepSeek-V2.5",
-    displayName: "🤖 DeepSeek V2.5",
+    displayName: "⚡️ DeepSeek V2.5",
     maxTokens: 4096,
     supportStream: true,
   },
