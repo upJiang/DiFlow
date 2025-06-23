@@ -196,57 +196,130 @@ const cursorRulesData = {
 - Electron 安全指南：https://www.electronjs.org/docs/tutorial/security`,
 };
 
-// 真实的 MCP 服务数据
+// 真实的 MCP 服务数据 - 基于用户的实际配置
 const mcpServersData = [
   {
-    name: "Figma Context MCP",
+    name: "Figma Developer MCP",
     icon: "🎯",
     description: "连接 Figma 设计文件，让 AI 理解设计布局并生成相应代码",
     category: "design",
     trust: 8.9,
     config: `{
   "mcpServers": {
-    "figma": {
+    "Framelink Figma MCP": {
       "command": "npx",
-      "args": ["-y", "figma-developer-mcp", "--figma-api-key=YOUR_KEY", "--stdio"]
+      "args": [
+        "-y",
+        "figma-developer-mcp",
+        "--figma-api-key=YOUR_FIGMA_API_KEY",
+        "--stdio"
+      ]
     }
   }
 }`,
     link: "https://github.com/figma/figma-developer-mcp",
   },
   {
-    name: "Browser Use MCP",
-    icon: "🌐",
-    description: "让 AI 能够控制浏览器，自动化网页操作和数据抓取",
-    category: "design",
-    trust: 7.3,
+    name: "Playwright MCP",
+    icon: "🎭",
+    description: "自动化浏览器测试和网页操作，支持多浏览器",
+    category: "api",
+    trust: 8.4,
     config: `{
   "mcpServers": {
-    "browser-use": {
+    "playwright": {
       "command": "npx",
-      "args": ["-y", "browser-use-mcp-server", "--stdio"]
+      "args": ["-y", "@executeautomation/playwright-mcp-server"]
     }
   }
 }`,
-    link: "https://github.com/browser-use/mcp-server",
+    link: "https://github.com/executeautomation/playwright-mcp-server",
   },
   {
-    name: "Context7",
+    name: "Sequential Thinking MCP",
+    icon: "🧠",
+    description: "提供结构化思维和推理能力，增强 AI 的逻辑处理",
+    category: "tools",
+    trust: 8.7,
+    config: `{
+  "mcpServers": {
+    "sequentialthinking": {
+      "command": "npx",
+      "args": ["-y", "mcprouter"],
+      "env": {
+        "SERVER_KEY": "YOUR_SERVER_KEY"
+      }
+    }
+  }
+}`,
+    link: "https://github.com/sequentialthinking/mcp-router",
+  },
+  {
+    name: "Browser Tools MCP",
+    icon: "🌐",
+    description: "浏览器自动化工具集，支持网页抓取和操作",
+    category: "tools",
+    trust: 8.2,
+    config: `{
+  "mcpServers": {
+    "browser-tools": {
+      "command": "npx",
+      "args": ["-y", "@agentdeskai/browser-tools-mcp@1.2.0"]
+    }
+  }
+}`,
+    link: "https://github.com/agentdeskai/browser-tools-mcp",
+  },
+  {
+    name: "Exa Search MCP",
+    icon: "🔍",
+    description: "强大的搜索引擎 API，提供精准的网络搜索能力",
+    category: "api",
+    trust: 8.5,
+    config: `{
+  "mcpServers": {
+    "exa": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "https://mcp.exa.ai/mcp?exaApiKey=YOUR_EXA_API_KEY"
+      ]
+    }
+  }
+}`,
+    link: "https://exa.ai/",
+  },
+  {
+    name: "DeepWiki SSE",
     icon: "📖",
+    description: "深度解析 GitHub 项目文档，提供项目结构和使用指南",
+    category: "docs",
+    trust: 8.6,
+    config: `{
+  "mcpServers": {
+    "deepwiki-sse": {
+      "url": "https://mcp.deepwiki.com/sse"
+    }
+  }
+}`,
+    link: "https://deepwiki.ai/",
+  },
+  {
+    name: "Context7 MCP",
+    icon: "📚",
     description: "提供最新的技术文档和库信息，帮助 AI 获取准确的编程知识",
     category: "docs",
     trust: 9.2,
-    config: "通过 MCP 客户端自动配置",
+    config: `{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    }
+  }
+}`,
     link: "https://context7.ai/",
-  },
-  {
-    name: "DeepWiki",
-    icon: "🧠",
-    description: "深度解析 GitHub 项目文档，提供项目结构和使用指南",
-    category: "docs",
-    trust: 8.5,
-    config: "通过 MCP 客户端自动配置",
-    link: "https://deepwiki.ai/",
   },
   {
     name: "File System MCP",
@@ -280,47 +353,6 @@ const mcpServersData = [
 }`,
     link: "https://github.com/modelcontextprotocol/servers",
   },
-  {
-    name: "Database MCP",
-    icon: "🗄️",
-    description: "数据库连接和查询，支持多种数据库类型",
-    category: "tools",
-    trust: 8.6,
-    config: `{
-  "mcpServers": {
-    "sqlite": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sqlite", "database.db", "--stdio"]
-    }
-  }
-}`,
-    link: "https://github.com/modelcontextprotocol/servers",
-  },
-  {
-    name: "Playwright MCP",
-    icon: "🎭",
-    description: "自动化浏览器测试和网页操作，支持多浏览器",
-    category: "api",
-    trust: 8.4,
-    config: "通过 MCP 客户端自动配置",
-    link: "https://playwright.dev/",
-  },
-  {
-    name: "HTTP Client MCP",
-    icon: "🌍",
-    description: "HTTP 请求客户端，支持 REST API 调用和测试",
-    category: "api",
-    trust: 8.2,
-    config: `{
-  "mcpServers": {
-    "http": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-http", "--stdio"]
-    }
-  }
-}`,
-    link: "https://github.com/modelcontextprotocol/servers",
-  },
 ];
 
 export default function CursorMCPPage() {
@@ -330,6 +362,7 @@ export default function CursorMCPPage() {
   const [selectedRule, setSelectedRule] = useState<string | null>(null);
   const [selectedMCP, setSelectedMCP] = useState<any>(null);
   const [copiedText, setCopiedText] = useState<string>("");
+  const [showCopySuccess, setShowCopySuccess] = useState<boolean>(false);
 
   /**
    * 复制文本到剪贴板
@@ -340,9 +373,31 @@ export default function CursorMCPPage() {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedText(type);
-      setTimeout(() => setCopiedText(""), 2000);
+      setShowCopySuccess(true);
+      setTimeout(() => {
+        setCopiedText("");
+        setShowCopySuccess(false);
+      }, 2000);
     } catch (err) {
       console.error("复制失败:", err);
+      // 降级处理：创建临时 textarea 元素
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        setCopiedText(type);
+        setShowCopySuccess(true);
+        setTimeout(() => {
+          setCopiedText("");
+          setShowCopySuccess(false);
+        }, 2000);
+      } catch (fallbackErr) {
+        console.error("降级复制也失败:", fallbackErr);
+        alert("复制失败，请手动复制内容");
+      }
+      document.body.removeChild(textarea);
     }
   };
 
@@ -357,9 +412,10 @@ export default function CursorMCPPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 pt-16">
       {/* 复制成功提示 */}
-      {copiedText && (
-        <div className="fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in-delay">
-          ✅ {copiedText} 已复制到剪贴板
+      {showCopySuccess && (
+        <div className="fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-delay flex items-center space-x-2">
+          <span className="text-lg">✅</span>
+          <span className="font-medium">{copiedText} 已复制到剪贴板</span>
         </div>
       )}
 
@@ -442,8 +498,8 @@ export default function CursorMCPPage() {
                   DiFlow 智能开发插件
                 </h2>
                 <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                  专为 Cursor 设计的智能开发助手，集成 Rules 同步、MCP
-                  配置、代码优化等功能
+                  专为 Cursor 和 VS Code 设计的智能开发助手，集成 Rules
+                  同步、MCP 配置、代码优化等功能
                 </p>
               </div>
 
@@ -476,22 +532,28 @@ export default function CursorMCPPage() {
                   <h3 className="text-xl font-semibold text-purple-800 mb-4 flex items-center">
                     <span className="mr-2">📦</span>安装指南
                   </h3>
-                  <div className="space-y-3">
-                    <div className="bg-white rounded-lg p-3 border border-purple-200">
-                      <p className="text-sm text-gray-600 mb-2">
-                        1. 从扩展市场安装
+                  <div className="space-y-4">
+                    <div className="bg-white rounded-lg p-4 border border-purple-200">
+                      <p className="text-sm text-gray-600 mb-2 font-medium">
+                        🎯 VS Code / Cursor 扩展市场
                       </p>
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                        Cursor Extensions → 搜索 "DiFlow"
-                      </code>
+                      <div className="bg-gray-100 rounded p-2 text-xs font-mono">
+                        1. 打开扩展面板 (Ctrl+Shift+X)
+                        <br />
+                        2. 搜索 "DiFlow"
+                        <br />
+                        3. 点击安装即可使用
+                      </div>
                     </div>
-                    <div className="bg-white rounded-lg p-3 border border-purple-200">
-                      <p className="text-sm text-gray-600 mb-2">
-                        2. 或手动安装
+                    <div className="bg-white rounded-lg p-4 border border-purple-200">
+                      <p className="text-sm text-gray-600 mb-2 font-medium">
+                        📥 手动安装 (.vsix)
                       </p>
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">
-                        下载 .vsix 文件并安装
-                      </code>
+                      <div className="bg-gray-100 rounded p-2 text-xs font-mono">
+                        从 GitHub Releases 下载 .vsix 文件
+                        <br />
+                        使用 "Install from VSIX" 安装
+                      </div>
                     </div>
                   </div>
                 </div>
