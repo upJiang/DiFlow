@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { User } from "@/types/user";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 interface ChatMessage {
   id: string;
@@ -425,14 +426,14 @@ export default function ChatBox({
               </p>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded-lg">
               💾 记忆开启
             </div>
             {messages.length > 0 && (
               <button
                 onClick={clearChat}
-                className="text-gray-400 hover:text-red-500 text-sm p-1"
+                className="text-gray-400 hover:text-red-500 text-sm p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
                 title="清空对话"
               >
                 🗑️
@@ -441,7 +442,7 @@ export default function ChatBox({
             {isModal && onClose && (
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 text-lg p-1"
+                className="text-gray-400 hover:text-gray-600 text-lg p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
                 title="关闭"
               >
                 ✕
@@ -505,7 +506,11 @@ export default function ChatBox({
                 <div
                   className={`flex ${
                     message.role === "user" ? "flex-row-reverse" : "flex-row"
-                  } items-start space-x-3 max-w-[80%]`}
+                  } items-start ${
+                    message.role === "user"
+                      ? "space-x-reverse space-x-4"
+                      : "space-x-4"
+                  } max-w-[80%]`}
                 >
                   <div className="flex-shrink-0">
                     {message.role === "user" ? (
@@ -520,18 +525,23 @@ export default function ChatBox({
                   </div>
 
                   <div
-                    className={`rounded-2xl px-4 py-2 shadow-sm ${
+                    className={`rounded-2xl px-4 py-2 shadow-sm group ${
                       message.role === "user"
-                        ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white mr-3"
-                        : "bg-gray-100 text-gray-800 ml-3"
+                        ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+                        : "bg-gray-100 text-gray-800 relative"
                     }`}
-                    style={{
-                      marginRight: message.role === "user" ? "10px" : "0px",
-                    }}
                   >
-                    <div className="whitespace-pre-wrap break-words text-sm">
-                      {message.content}
-                    </div>
+                    {message.role === "assistant" ? (
+                      <MarkdownRenderer
+                        content={message.content}
+                        showCopyButton={true}
+                        className="text-sm"
+                      />
+                    ) : (
+                      <div className="whitespace-pre-wrap break-words text-sm">
+                        {message.content}
+                      </div>
+                    )}
 
                     <div
                       className={`text-xs mt-1 ${
@@ -556,14 +566,16 @@ export default function ChatBox({
           {/* 流式消息 */}
           {streamingMessage.content && (
             <div className="flex justify-start">
-              <div className="flex flex-row items-start space-x-2 max-w-[80%]">
+              <div className="flex flex-row items-start space-x-4 max-w-[80%]">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 text-white flex items-center justify-center text-lg">
                   ⚡️
                 </div>
-                <div className="bg-gray-100 text-gray-800 rounded-2xl px-4 py-2 shadow-sm mr-2">
-                  <div className="whitespace-pre-wrap break-words text-sm">
-                    {streamingMessage.content}
-                  </div>
+                <div className="bg-gray-100 text-gray-800 rounded-2xl px-4 py-2 shadow-sm relative">
+                  <MarkdownRenderer
+                    content={streamingMessage.content}
+                    showCopyButton={false}
+                    className="text-sm"
+                  />
                   <div className="flex items-center mt-2 text-gray-500">
                     <div className="flex space-x-1">
                       <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce"></div>
@@ -608,7 +620,7 @@ export default function ChatBox({
           {/* 加载指示器 */}
           {loading && (
             <div className="flex justify-start">
-              <div className="flex flex-row items-start space-x-2">
+              <div className="flex flex-row items-start space-x-4">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 text-white flex items-center justify-center text-lg">
                   ⚡️
                 </div>

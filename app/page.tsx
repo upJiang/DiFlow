@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { User } from "@/types/user";
-import ChatBox from "@/components/ChatBox";
 
 function SearchParamsHandler({
   setError,
@@ -31,7 +30,6 @@ export default function HomePage() {
   const [error, setError] = useState<string>("");
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const [showChatBox, setShowChatBox] = useState(false);
   const [showMeteor, setShowMeteor] = useState(false);
 
   /**
@@ -211,53 +209,6 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-
-      {/* 悬浮对话按钮 */}
-      {user && (
-        <div className="fixed bottom-6 right-6 flex flex-col items-center z-50">
-          <button
-            onClick={() => setShowChatBox(!showChatBox)}
-            className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full shadow-2xl hover:shadow-blue-500/25 hover:scale-110 transition-all duration-300 flex items-center justify-center group animate-float mb-2"
-            title="快速对话"
-          >
-            <svg
-              className="w-7 h-7 group-hover:scale-110 transition-transform"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-              />
-            </svg>
-
-            {/* 悬停提示 */}
-            <div className="absolute right-full mr-4 bg-gray-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              快速对话
-              <div className="absolute top-1/2 left-full w-0 h-0 border-l-4 border-l-gray-800 border-y-4 border-y-transparent transform -translate-y-1/2"></div>
-            </div>
-          </button>
-
-          {/* 按钮下方文案 */}
-          <span className="text-xs text-gray-600 font-medium bg-white/80 backdrop-blur-sm px-2 py-1 rounded-lg shadow-sm">
-            快速对话
-          </span>
-        </div>
-      )}
-
-      {/* ChatBox组件 */}
-      {showChatBox && user && (
-        <ChatBox
-          user={user}
-          sessionId="homepage-chat"
-          onClose={() => setShowChatBox(false)}
-          isModal={true}
-          height="h-[70vh]"
-        />
-      )}
     </div>
   );
 }

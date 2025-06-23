@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 import { ToastProvider } from "@/components/ui/ToastContainer";
+import GlobalChatButton from "@/components/GlobalChatButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,6 +30,7 @@ export default function RootLayout({
         <ToastProvider>
           <Navigation />
           {children}
+          <GlobalChatButton />
         </ToastProvider>
       </body>
     </html>
