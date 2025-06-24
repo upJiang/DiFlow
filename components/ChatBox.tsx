@@ -414,40 +414,57 @@ export default function ChatBox({
     >
       {/* 聊天头部 */}
       {showHeader && (
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-2xl">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 text-white flex items-center justify-center text-lg">
-              ⚡️
+        <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-2xl">
+          <div className="flex items-center justify-between">
+            {/* 左侧：头像 + 标题 */}
+            <div className="flex items-center space-x-3 flex-1 overflow-hidden">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 text-white flex items-center justify-center text-lg flex-shrink-0">
+                ⚡️
+              </div>
+              <div className="overflow-hidden">
+                <h3 className="font-semibold text-gray-800 text-sm truncate">
+                  DiFlow AI
+                </h3>
+                <p className="text-xs text-gray-500 truncate">
+                  {hasKnowledgeBase ? "📚 知识库模式" : "💬 对话模式"}
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-800">DiFlow AI</h3>
-              <p className="text-xs text-gray-500">
-                {hasKnowledgeBase ? "📚 知识库模式" : "💬 对话模式"}
-              </p>
+
+            {/* 右侧：按钮组 */}
+            <div
+              className="flex items-center space-x-2 flex-shrink-0 ml-4"
+              style={{
+                paddingRight: "60px",
+              }}
+            >
+              {/* 记忆状态 - 只在大屏显示 */}
+              <div className="hidden md:flex text-xs text-gray-500 bg-white px-2 py-1 rounded-lg flex-shrink-0">
+                💾 记忆开启
+              </div>
+
+              {/* 清空按钮 */}
+              {messages.length > 0 && (
+                <button
+                  onClick={clearChat}
+                  className="w-8 h-8 text-gray-400 hover:text-red-500 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center flex-shrink-0"
+                  title="清空对话"
+                >
+                  🗑️
+                </button>
+              )}
+
+              {/* 关闭按钮 */}
+              {isModal && onClose && (
+                <button
+                  onClick={onClose}
+                  className="w-8 h-8 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center flex-shrink-0"
+                  title="关闭"
+                >
+                  ✕
+                </button>
+              )}
             </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="text-xs text-gray-500 bg-white px-2 py-1 rounded-lg">
-              💾 记忆开启
-            </div>
-            {messages.length > 0 && (
-              <button
-                onClick={clearChat}
-                className="text-gray-400 hover:text-red-500 text-sm p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                title="清空对话"
-              >
-                🗑️
-              </button>
-            )}
-            {isModal && onClose && (
-              <button
-                onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 text-lg p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                title="关闭"
-              >
-                ✕
-              </button>
-            )}
           </div>
         </div>
       )}
