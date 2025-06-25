@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import PluginSection from "./components/PluginSection";
+import RulesSection from "./components/RulesSection";
+import MCPSection from "./components/MCPSection";
 
 // 真实的 Cursor Rules 数据
 const cursorRulesData = {
@@ -356,557 +358,91 @@ const mcpServersData = [
 ];
 
 export default function CursorMCPPage() {
-  const [activeTab, setActiveTab] = useState<"plugin" | "rules" | "mcp">(
-    "plugin"
-  );
-  const [selectedRule, setSelectedRule] = useState<string | null>(null);
-  const [selectedMCP, setSelectedMCP] = useState<any>(null);
-  const [copiedText, setCopiedText] = useState<string>("");
-  const [showCopySuccess, setShowCopySuccess] = useState<boolean>(false);
+  const [activeTab, setActiveTab] = useState("plugin");
+  const [copyMessage, setCopyMessage] = useState("");
 
-  /**
-   * 复制文本到剪贴板
-   * @param text 要复制的文本内容
-   * @param type 复制类型，用于显示提示
-   */
-  const copyToClipboard = async (text: string, type: string) => {
+  const handleCopy = async (text: string, type: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopiedText(type);
-      setShowCopySuccess(true);
-      setTimeout(() => {
-        setCopiedText("");
-        setShowCopySuccess(false);
-      }, 2000);
+      setCopyMessage(`${type} 已复制到剪贴板`);
+      setTimeout(() => setCopyMessage(""), 3000);
     } catch (err) {
       console.error("复制失败:", err);
-      // 降级处理：创建临时 textarea 元素
-      const textarea = document.createElement("textarea");
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      try {
-        document.execCommand("copy");
-        setCopiedText(type);
-        setShowCopySuccess(true);
-        setTimeout(() => {
-          setCopiedText("");
-          setShowCopySuccess(false);
-        }, 2000);
-      } catch (fallbackErr) {
-        console.error("降级复制也失败:", fallbackErr);
-        alert("复制失败，请手动复制内容");
-      }
-      document.body.removeChild(textarea);
+      setCopyMessage("复制失败，请手动复制");
+      setTimeout(() => setCopyMessage(""), 3000);
     }
   };
 
-  /**
-   * 打开外部链接
-   * @param url 要打开的链接地址
-   */
-  const openExternalLink = (url: string) => {
-    window.open(url, "_blank", "noopener,noreferrer");
+  const handleOpenLink = (url: string) => {
+    window.open(url, "_blank");
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 pt-16">
-      {/* 复制成功提示 */}
-      {showCopySuccess && (
-        <div className="fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in-delay flex items-center space-x-2">
-          <span className="text-lg">✅</span>
-          <span className="font-medium">{copiedText} 已复制到剪贴板</span>
-        </div>
-      )}
-
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* 页面标题 */}
-        <div className="text-center mb-12">
-          <div className="text-6xl mb-6">🎯</div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
-            Cursor & MCP 生态系统
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* 头部 */}
+        <div className="text-center mb-8">
+          <h1 className="text-5xl font-bold text-gray-800 mb-4">
+            <span className="mr-4">🚀</span>DiFlow 开发工具集
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            探索 DiFlow 插件，收集优质 Cursor Rules，发现强大的 MCP 服务
+            集成插件、编程规范和 MCP 服务的一站式开发平台
           </p>
-          <div className="mt-4 flex justify-center space-x-4">
-            <a
-              href="https://mcp.so/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-            >
-              🔗 访问 MCP.so 获取更多服务
-            </a>
-            <a
-              href="https://github.com/modelcontextprotocol/servers"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-            >
-              📚 官方 MCP 服务器仓库
-            </a>
-          </div>
         </div>
 
-        {/* 标签页导航 */}
-        <div className="flex justify-center mb-12">
+        {/* 导航标签 */}
+        <div className="flex justify-center mb-8">
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-2 shadow-lg border border-white/50">
             <div className="flex space-x-2">
               <button
                 onClick={() => setActiveTab("plugin")}
-                className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
                   activeTab === "plugin"
                     ? "bg-blue-600 text-white shadow-lg"
-                    : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                    : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
                 }`}
               >
                 <span className="mr-2">🔌</span>DiFlow 插件
               </button>
               <button
                 onClick={() => setActiveTab("rules")}
-                className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
                   activeTab === "rules"
                     ? "bg-blue-600 text-white shadow-lg"
-                    : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                    : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
                 }`}
               >
-                <span className="mr-2">📋</span>Rule 收录
+                <span className="mr-2">📋</span>Cursor 规则
               </button>
               <button
                 onClick={() => setActiveTab("mcp")}
-                className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 ${
                   activeTab === "mcp"
                     ? "bg-blue-600 text-white shadow-lg"
-                    : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                    : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
                 }`}
               >
-                <span className="mr-2">🔗</span>MCP 收录
+                <span className="mr-2">🔗</span>MCP 服务
               </button>
             </div>
           </div>
         </div>
 
-        {/* 标签页内容 */}
+        {/* 复制成功提示 */}
+        {copyMessage && (
+          <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+            {copyMessage}
+          </div>
+        )}
+
+        {/* 内容区域 */}
         <div className="max-w-6xl mx-auto">
-          {/* DiFlow 插件介绍 */}
-          {activeTab === "plugin" && (
-            <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/50">
-              <div className="text-center mb-8">
-                <div className="text-6xl mb-4">⚡</div>
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                  DiFlow 智能开发插件
-                </h2>
-                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                  专为 Cursor 和 VS Code 设计的智能开发助手，集成 Rules
-                  同步、MCP 配置、代码优化等功能
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-8 mb-8">
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
-                  <h3 className="text-xl font-semibold text-blue-800 mb-4 flex items-center">
-                    <span className="mr-2">🎯</span>核心功能
-                  </h3>
-                  <ul className="space-y-3 text-gray-700">
-                    <li className="flex items-start">
-                      <span className="text-blue-500 mr-2">•</span>
-                      <span>智能 Rules 同步与管理</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-blue-500 mr-2">•</span>
-                      <span>一键 MCP 服务配置</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-blue-500 mr-2">•</span>
-                      <span>代码质量实时检测</span>
-                    </li>
-                    <li className="flex items-start">
-                      <span className="text-blue-500 mr-2">•</span>
-                      <span>项目模板快速生成</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
-                  <h3 className="text-xl font-semibold text-purple-800 mb-4 flex items-center">
-                    <span className="mr-2">📦</span>安装指南
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="bg-white rounded-lg p-4 border border-purple-200">
-                      <p className="text-sm text-gray-600 mb-2 font-medium">
-                        🎯 VS Code / Cursor 扩展市场
-                      </p>
-                      <div className="bg-gray-100 rounded p-2 text-xs font-mono">
-                        1. 打开扩展面板 (Ctrl+Shift+X)
-                        <br />
-                        2. 搜索 "DiFlow"
-                        <br />
-                        3. 点击安装即可使用
-                      </div>
-                    </div>
-                    <div className="bg-white rounded-lg p-4 border border-purple-200">
-                      <p className="text-sm text-gray-600 mb-2 font-medium">
-                        📥 手动安装 (.vsix)
-                      </p>
-                      <div className="bg-gray-100 rounded p-2 text-xs font-mono">
-                        从 GitHub Releases 下载 .vsix 文件
-                        <br />
-                        使用 "Install from VSIX" 安装
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
-                <h3 className="text-xl font-semibold text-green-800 mb-4 flex items-center">
-                  <span className="mr-2">🚀</span>使用指南
-                </h3>
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div className="bg-white rounded-lg p-4 border border-green-200">
-                    <div className="text-2xl mb-2">1️⃣</div>
-                    <h4 className="font-medium text-green-800 mb-2">
-                      配置 Rules
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      从 Rule 收录中选择适合的规则，一键同步到项目
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 border border-green-200">
-                    <div className="text-2xl mb-2">2️⃣</div>
-                    <h4 className="font-medium text-green-800 mb-2">
-                      配置 MCP
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      选择需要的 MCP 服务，自动生成配置文件
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-lg p-4 border border-green-200">
-                    <div className="text-2xl mb-2">3️⃣</div>
-                    <h4 className="font-medium text-green-800 mb-2">
-                      开始开发
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      享受智能提示和代码优化建议
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Rule 收录 */}
+          {activeTab === "plugin" && <PluginSection />}
           {activeTab === "rules" && (
-            <div className="space-y-6">
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/50">
-                <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-                  <span className="mr-3">📋</span>Cursor Rules 收录
-                </h2>
-                <p className="text-lg text-gray-600 text-center mb-8">
-                  精选高质量的 Cursor Rules，提升开发效率和代码质量
-                </p>
-
-                {/* 规则分类 */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {/* 通用规则 */}
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-100">
-                    <h3 className="text-xl font-semibold text-blue-800 mb-4">
-                      🔧 通用规则
-                    </h3>
-                    <div className="space-y-3">
-                      <button
-                        onClick={() =>
-                          setSelectedRule(cursorRulesData.general.codeQuality)
-                        }
-                        className="w-full text-left p-3 bg-white rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors"
-                      >
-                        <div className="font-medium text-blue-800">
-                          代码质量
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          基本原则、错误处理、性能优化
-                        </div>
-                      </button>
-                      <button
-                        onClick={() =>
-                          setSelectedRule(cursorRulesData.general.naming)
-                        }
-                        className="w-full text-left p-3 bg-white rounded-lg border border-blue-200 hover:bg-blue-50 transition-colors"
-                      >
-                        <div className="font-medium text-blue-800">
-                          命名规范
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          变量、函数、文件命名规则
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* React 规则 */}
-                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-6 border border-cyan-100">
-                    <h3 className="text-xl font-semibold text-cyan-800 mb-4">
-                      ⚛️ React
-                    </h3>
-                    <button
-                      onClick={() => setSelectedRule(cursorRulesData.react)}
-                      className="w-full text-left p-3 bg-white rounded-lg border border-cyan-200 hover:bg-cyan-50 transition-colors"
-                    >
-                      <div className="font-medium text-cyan-800">
-                        React 开发规则
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        组件、Hooks、性能优化
-                      </div>
-                    </button>
-                  </div>
-
-                  {/* Vue 规则 */}
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border border-green-100">
-                    <h3 className="text-xl font-semibold text-green-800 mb-4">
-                      🔥 Vue
-                    </h3>
-                    <button
-                      onClick={() => setSelectedRule(cursorRulesData.vue)}
-                      className="w-full text-left p-3 bg-white rounded-lg border border-green-200 hover:bg-green-50 transition-colors"
-                    >
-                      <div className="font-medium text-green-800">
-                        Vue 开发规则
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        Composition API、响应式
-                      </div>
-                    </button>
-                  </div>
-
-                  {/* Next.js 规则 */}
-                  <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-6 border border-purple-100">
-                    <h3 className="text-xl font-semibold text-purple-800 mb-4">
-                      ▲ Next.js
-                    </h3>
-                    <button
-                      onClick={() => setSelectedRule(cursorRulesData.nextjs)}
-                      className="w-full text-left p-3 bg-white rounded-lg border border-purple-200 hover:bg-purple-50 transition-colors"
-                    >
-                      <div className="font-medium text-purple-800">
-                        Next.js 开发规则
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        App Router、SSR、优化
-                      </div>
-                    </button>
-                  </div>
-
-                  {/* Node.js 规则 */}
-                  <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl p-6 border border-yellow-100">
-                    <h3 className="text-xl font-semibold text-yellow-800 mb-4">
-                      🟢 Node.js
-                    </h3>
-                    <button
-                      onClick={() => setSelectedRule(cursorRulesData.nodejs)}
-                      className="w-full text-left p-3 bg-white rounded-lg border border-yellow-200 hover:bg-yellow-50 transition-colors"
-                    >
-                      <div className="font-medium text-yellow-800">
-                        Node.js/Nest.js 规则
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        模块化、错误处理、API
-                      </div>
-                    </button>
-                  </div>
-
-                  {/* Nuxt 规则 */}
-                  <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-6 border border-teal-100">
-                    <h3 className="text-xl font-semibold text-teal-800 mb-4">
-                      💚 Nuxt
-                    </h3>
-                    <button
-                      onClick={() => setSelectedRule(cursorRulesData.nuxt)}
-                      className="w-full text-left p-3 bg-white rounded-lg border border-teal-200 hover:bg-teal-50 transition-colors"
-                    >
-                      <div className="font-medium text-teal-800">
-                        Nuxt 开发规则
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        SSR、自动导入、模块
-                      </div>
-                    </button>
-                  </div>
-
-                  {/* Electron 规则 */}
-                  <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
-                    <h3 className="text-xl font-semibold text-indigo-800 mb-4">
-                      🖥️ Electron
-                    </h3>
-                    <button
-                      onClick={() => setSelectedRule(cursorRulesData.electron)}
-                      className="w-full text-left p-3 bg-white rounded-lg border border-indigo-200 hover:bg-indigo-50 transition-colors"
-                    >
-                      <div className="font-medium text-indigo-800">
-                        Electron 开发规则
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        进程通信、安全性、性能
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* 规则详情弹窗 */}
-              {selectedRule && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                  <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
-                    <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-                      <h3 className="text-2xl font-bold text-gray-800">
-                        规则详情
-                      </h3>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() =>
-                            copyToClipboard(selectedRule, "规则内容")
-                          }
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          📋 复制
-                        </button>
-                        <button
-                          onClick={() => setSelectedRule(null)}
-                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                        >
-                          ✕ 关闭
-                        </button>
-                      </div>
-                    </div>
-                    <div className="p-6 overflow-y-auto max-h-[60vh]">
-                      <pre className="whitespace-pre-wrap text-sm text-gray-700 bg-gray-50 p-4 rounded-lg">
-                        {selectedRule}
-                      </pre>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <RulesSection onCopy={handleCopy} onOpenLink={handleOpenLink} />
           )}
-
-          {/* MCP 收录 */}
           {activeTab === "mcp" && (
-            <div className="space-y-6">
-              <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/50">
-                <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-                  <span className="mr-3">🔗</span>MCP 服务收录
-                </h2>
-                <p className="text-lg text-gray-600 text-center mb-8">
-                  精选优质的 Model Context Protocol 服务，扩展 AI 能力边界
-                </p>
-
-                {/* MCP 服务网格 */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {mcpServersData.map((server, index) => (
-                    <div
-                      key={index}
-                      className="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-6 border border-gray-200 hover:shadow-xl transition-all duration-300 cursor-pointer"
-                      onClick={() => setSelectedMCP(server)}
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="text-3xl">{server.icon}</div>
-                        <div className="flex items-center space-x-1">
-                          <span className="text-yellow-500">⭐</span>
-                          <span className="text-sm font-medium text-gray-600">
-                            {server.trust}
-                          </span>
-                        </div>
-                      </div>
-                      <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                        {server.name}
-                      </h3>
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                        {server.description}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                          {server.category}
-                        </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openExternalLink(server.link);
-                          }}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                        >
-                          查看详情 →
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* MCP 详情弹窗 */}
-              {selectedMCP && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                  <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[80vh] overflow-hidden">
-                    <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-                      <div className="flex items-center space-x-3">
-                        <span className="text-3xl">{selectedMCP.icon}</span>
-                        <div>
-                          <h3 className="text-2xl font-bold text-gray-800">
-                            {selectedMCP.name}
-                          </h3>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <span className="text-yellow-500">⭐</span>
-                            <span className="text-sm text-gray-600">
-                              信任度: {selectedMCP.trust}/10
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() =>
-                            copyToClipboard(selectedMCP.config, "MCP 配置")
-                          }
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          📋 复制配置
-                        </button>
-                        <button
-                          onClick={() => openExternalLink(selectedMCP.link)}
-                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                          🔗 访问链接
-                        </button>
-                        <button
-                          onClick={() => setSelectedMCP(null)}
-                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                        >
-                          ✕ 关闭
-                        </button>
-                      </div>
-                    </div>
-                    <div className="p-6 overflow-y-auto max-h-[60vh]">
-                      <div className="mb-6">
-                        <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                          服务描述
-                        </h4>
-                        <p className="text-gray-600">
-                          {selectedMCP.description}
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-semibold text-gray-800 mb-2">
-                          配置信息
-                        </h4>
-                        <pre className="bg-gray-50 p-4 rounded-lg text-sm text-gray-700 overflow-x-auto">
-                          {selectedMCP.config}
-                        </pre>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <MCPSection onCopy={handleCopy} onOpenLink={handleOpenLink} />
           )}
         </div>
       </div>
