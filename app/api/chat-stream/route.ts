@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     // 验证JWT token
     try {
-      jwt.verify(token, process.env.JWT_SECRET!);
+      jwt.verify(token, process.env.JWT_PRIVATE_KEY!);
     } catch (error) {
       return NextResponse.json(
         { error: "登录已过期，请重新登录" },

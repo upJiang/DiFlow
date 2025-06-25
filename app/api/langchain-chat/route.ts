@@ -5,7 +5,11 @@ import {
   addDocumentsToVectorStore,
   isVectorStoreEmpty,
 } from "@/lib/langchain/vectorStore";
-import { getSessionMemory, getSessionStats } from "@/lib/langchain/memory";
+import {
+  getSessionMemory,
+  getSessionStats,
+  clearMemory,
+} from "@/lib/langchain/memory";
 import jwt from "jsonwebtoken";
 
 interface JWTPayload {
@@ -20,20 +24,21 @@ interface JWTPayload {
  */
 function getUserFromRequest(request: NextRequest): JWTPayload | null {
   try {
-    const token = request.cookies.get("auth-token")?.value;
-
-    if (!token) {
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
       return null;
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_PRIVATE_KEY!
-    ) as JWTPayload;
+    const token = authHeader.substring(7);
+    const secret = process.env.JWT_PRIVATE_KEY;
+    if (!secret) {
+      throw new Error("JWT_PRIVATE_KEY not configured");
+    }
 
+    const decoded = jwt.verify(token, secret) as JWTPayload;
     return decoded;
   } catch (error) {
-    console.error("获取用户认证失败:", error);
+    console.error("JWT验证失败:", error);
     return null;
   }
 }
@@ -42,100 +47,97 @@ export async function POST(req: NextRequest) {
   try {
     const user = getUserFromRequest(req);
     if (!user) {
-      return NextResponse.json({ error: "未授权访问" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: "未授权访问" },
+        { status: 401 }
+      );
     }
 
     const body = await req.json();
-    const {
-      messages,
-      files,
-      sessionId = "default",
-      useVectorStore = true,
-      temperature = 0.7,
-    } = body;
 
-    if (!messages || messages.length === 0) {
+    // 检查是否是清除记忆的请求
+    if (body.action === "clearMemory" && body.sessionId) {
+      clearMemory(body.sessionId);
+      return NextResponse.json({
+        success: true,
+        message: "会话记忆已清除",
+      });
+    }
+
+    const { messages, files, sessionId, useVectorStore, temperature } = body;
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json(
-        {
-          error: "没有提供消息",
-        },
+        { success: false, error: "消息数组不能为空" },
         { status: 400 }
       );
     }
 
-    // 获取最新的用户消息
-    const lastMessage = messages[messages.length - 1];
-    if (!lastMessage || lastMessage.role !== "user") {
-      return NextResponse.json(
-        {
-          error: "最后一条消息必须是用户消息",
-        },
-        { status: 400 }
-      );
-    }
-
+    // 处理文件上传（如果有）
     let processedDocuments = null;
-    let vectorStoreUsed = false;
-
-    // 如果有文件上传，处理文档
     if (files && files.length > 0) {
-      console.log(`处理 ${files.length} 个上传的文件`);
-
       try {
-        processedDocuments = await processMultipleDocuments(files);
+        const documentsData = files.map((file: any, index: number) => ({
+          id: `${sessionId}_file_${index}_${Date.now()}`,
+          base64Content: file.content,
+          filename: file.name,
+          metadata: {
+            type: file.type,
+            size: file.size,
+            uploadedAt: new Date().toISOString(),
+          },
+        }));
 
+        processedDocuments = await processMultipleDocuments(documentsData);
+
+        // 添加到向量存储
         if (processedDocuments && processedDocuments.length > 0) {
-          const totalChunks = await addDocumentsToVectorStore(
-            processedDocuments
-          );
-          console.log(`成功向量化 ${totalChunks} 个文档块`);
-          vectorStoreUsed = true;
+          await addDocumentsToVectorStore(processedDocuments);
         }
       } catch (error) {
         console.error("文档处理失败:", error);
         return NextResponse.json(
           {
-            error: "文档处理失败，请检查文件格式",
+            success: false,
+            error: `文档处理失败: ${
+              error instanceof Error ? error.message : "未知错误"
+            }`,
           },
-          { status: 400 }
+          { status: 500 }
         );
       }
     }
 
-    // 检查是否有向量存储可用
-    const hasVectorStore = !(await isVectorStoreEmpty());
+    // 获取最后一条用户消息
+    const lastUserMessage = messages
+      .filter((msg: any) => msg.role === "user")
+      .pop();
+
+    if (!lastUserMessage) {
+      return NextResponse.json(
+        { success: false, error: "未找到用户消息" },
+        { status: 400 }
+      );
+    }
 
     // 准备查询参数
-    const queryParams: QueryParams = {
-      question: lastMessage.content,
-      sessionId,
-      useVectorStore: useVectorStore && hasVectorStore,
-      temperature,
-      maxTokens: 2000,
-      conversationHistory: messages.slice(0, -1), // 排除最后一条消息，因为它是当前查询
+    const queryParams = {
+      question: lastUserMessage.content,
+      sessionId: sessionId || "anonymous",
+      useVectorStore: useVectorStore ?? true,
+      temperature: temperature || 0.7,
+      conversationHistory: messages.slice(-10), // 保留最近10条消息作为上下文
     };
-
-    console.log("执行查询:", {
-      sessionId,
-      useVectorStore: queryParams.useVectorStore,
-      hasVectorStore,
-      messageCount: messages.length,
-    });
 
     // 执行查询
     const result = await processQuery(queryParams);
 
-    // 获取会话内存统计
-    const stats = await getSessionStats(sessionId);
-
-    // 返回结果
     return NextResponse.json({
       success: true,
       data: {
         response: result.response,
         sources: result.sources || [],
         usedVectorStore: result.usedVectorStore || false,
-        sessionId,
         processedDocuments: processedDocuments
           ? {
               count: processedDocuments.length,
@@ -145,16 +147,6 @@ export async function POST(req: NextRequest) {
               ),
             }
           : null,
-        memoryStats: {
-          messageCount: stats.messageCount,
-          sessionId,
-        },
-        metadata: {
-          timestamp: new Date().toISOString(),
-          vectorStoreAvailable: hasVectorStore,
-          temperature,
-          model: "deepseek-chat",
-        },
       },
     });
   } catch (error) {
@@ -164,7 +156,6 @@ export async function POST(req: NextRequest) {
       {
         success: false,
         error: error instanceof Error ? error.message : "内部服务器错误",
-        details: process.env.NODE_ENV === "development" ? error : undefined,
       },
       { status: 500 }
     );

@@ -6,6 +6,7 @@ import ChatBox from "@/components/ChatBox";
 export default function GlobalChatButton() {
   const [showChatBox, setShowChatBox] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [sessionId, setSessionId] = useState<string>("");
 
   useEffect(() => {
     // 检查用户登录状态
@@ -21,7 +22,20 @@ export default function GlobalChatButton() {
       }
     };
 
+    // 生成或获取持久的会话ID
+    const initSessionId = () => {
+      const stored = localStorage.getItem("diflow_chat_session_id");
+      if (stored) {
+        setSessionId(stored);
+      } else {
+        const newSessionId = crypto.randomUUID();
+        localStorage.setItem("diflow_chat_session_id", newSessionId);
+        setSessionId(newSessionId);
+      }
+    };
+
     checkAuth();
+    initSessionId();
   }, []);
 
   return (
@@ -55,7 +69,7 @@ export default function GlobalChatButton() {
       </div>
 
       {/* 对话框 */}
-      {showChatBox && user && (
+      {showChatBox && user && sessionId && (
         <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black bg-opacity-50">
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full h-[70vh] overflow-hidden">
             <button
@@ -76,7 +90,7 @@ export default function GlobalChatButton() {
                 />
               </svg>
             </button>
-            <ChatBox user={user} height="h-full" />
+            <ChatBox user={user} height="h-full" sessionId={sessionId} />
           </div>
         </div>
       )}

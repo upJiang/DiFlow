@@ -23,7 +23,7 @@ const mcpServersData = [
     }
   }
 }`,
-    link: "https://github.com/figma/figma-developer-mcp",
+    link: "https://www.npmjs.com/package/figma-developer-mcp",
   },
   {
     name: "Playwright MCP",
@@ -39,7 +39,7 @@ const mcpServersData = [
     }
   }
 }`,
-    link: "https://github.com/executeautomation/playwright-mcp-server",
+    link: "https://www.npmjs.com/package/@executeautomation/playwright-mcp-server",
   },
   {
     name: "Sequential Thinking MCP",
@@ -58,7 +58,7 @@ const mcpServersData = [
     }
   }
 }`,
-    link: "https://github.com/sequentialthinking/mcp-router",
+    link: "https://www.npmjs.com/package/mcprouter",
   },
   {
     name: "Browser Tools MCP",
@@ -74,7 +74,7 @@ const mcpServersData = [
     }
   }
 }`,
-    link: "https://github.com/agentdeskai/browser-tools-mcp",
+    link: "https://www.npmjs.com/package/@agentdeskai/browser-tools-mcp",
   },
   {
     name: "Exa Search MCP",
@@ -109,7 +109,7 @@ const mcpServersData = [
     }
   }
 }`,
-    link: "https://deepwiki.ai/",
+    link: "https://github.com/regenrek/deepwiki-mcp",
   },
   {
     name: "Context7 MCP",
@@ -125,7 +125,7 @@ const mcpServersData = [
     }
   }
 }`,
-    link: "https://context7.ai/",
+    link: "https://github.com/upstash/context7",
   },
   {
     name: "File System MCP",
@@ -141,7 +141,7 @@ const mcpServersData = [
     }
   }
 }`,
-    link: "https://github.com/modelcontextprotocol/servers",
+    link: "https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem",
   },
   {
     name: "Git MCP",
@@ -157,7 +157,7 @@ const mcpServersData = [
     }
   }
 }`,
-    link: "https://github.com/modelcontextprotocol/servers",
+    link: "https://github.com/modelcontextprotocol/servers/tree/main/src/git",
   },
 ];
 

@@ -22,7 +22,9 @@ interface StreamingMessage {
 }
 
 interface ChatBoxProps {
-  user: User | null;
+  user: {
+    user: User | null;
+  };
   onError?: (error: string) => void;
   onClose?: () => void;
   placeholder?: string;
@@ -56,8 +58,6 @@ export default function ChatBox({
   const [processingFiles, setProcessingFiles] = useState<string[]>([]);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
-
   /**
    * 滚动到底部
    */
@@ -235,6 +235,23 @@ export default function ChatBox({
   };
 
   /**
+   * 获取认证 token
+   */
+  const getAuthToken = async (): Promise<string | null> => {
+    try {
+      const response = await fetch("/api/auth/token");
+      if (response.ok) {
+        const data = await response.json();
+        return data.token;
+      }
+      return null;
+    } catch (error) {
+      console.error("获取认证token失败:", error);
+      return null;
+    }
+  };
+
+  /**
    * 发送消息
    */
   const sendMessage = async () => {
@@ -277,6 +294,15 @@ export default function ChatBox({
     }, 100);
 
     try {
+      // 获取认证 token
+      console.log("Cookie内容:", document.cookie);
+      const authToken = await getAuthToken();
+      console.log("获取到的token:", authToken ? "存在" : "不存在");
+
+      if (!authToken) {
+        throw new Error("未找到认证令牌，请重新登录");
+      }
+
       // 准备文件数据 - 将File对象转换为可序列化的格式
       const files = [];
       if (currentFiles.length > 0) {
@@ -301,12 +327,13 @@ export default function ChatBox({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: [...messages, userMsg],
           files,
           sessionId: sessionId || "anonymous",
-          useVectorStore: true,
+          useVectorStore: hasKnowledgeBase,
           temperature: 0.7,
         }),
       });
@@ -379,10 +406,51 @@ export default function ChatBox({
   /**
    * 清空聊天
    */
-  const clearChat = () => {
+  const clearChat = async () => {
     setMessages([]);
     setStreamingMessage({ content: "" });
-    setHasKnowledgeBase(false);
+
+    // 重新检查向量存储状态，而不是直接设置为false
+    try {
+      const response = await fetch(
+        `/api/langchain-chat?sessionId=${sessionId || "default"}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setHasKnowledgeBase(data.data.vectorStoreAvailable || false);
+      }
+    } catch (error) {
+      console.error("检查向量存储状态失败:", error);
+    }
+
+    // 如果有会话ID，清除服务器端的会话记忆
+    if (sessionId) {
+      try {
+        // 获取认证 token
+        const authToken = await getAuthToken();
+        if (!authToken) {
+          console.warn("未找到认证令牌，无法清除服务器端会话记忆");
+          return;
+        }
+
+        const response = await fetch("/api/langchain-chat/clear-memory", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({ sessionId }),
+        });
+
+        if (response.ok) {
+          console.log("会话记忆已清除");
+        } else {
+          console.warn("清除会话记忆失败");
+        }
+      } catch (error) {
+        console.error("清除会话记忆时出错:", error);
+      }
+    }
   };
 
   /**
@@ -407,6 +475,30 @@ export default function ChatBox({
   useEffect(() => {
     scrollToBottom();
   }, [messages, streamingMessage]);
+
+  /**
+   * 检查向量存储状态
+   */
+  useEffect(() => {
+    const checkVectorStoreStatus = async () => {
+      try {
+        const response = await fetch(
+          `/api/langchain-chat?sessionId=${sessionId || "default"}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setHasKnowledgeBase(data.data.vectorStoreAvailable || false);
+        }
+      } catch (error) {
+        console.error("检查向量存储状态失败:", error);
+        setHasKnowledgeBase(false);
+      }
+    };
+
+    if (user?.user) {
+      checkVectorStoreStatus();
+    }
+  }, [sessionId, user]);
 
   const chatContent = (
     <div
@@ -532,7 +624,7 @@ export default function ChatBox({
                   <div className="flex-shrink-0">
                     {message.role === "user" ? (
                       <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white flex items-center justify-center text-sm font-bold shadow-lg">
-                        {getAvatarText(user?.name || "")}
+                        {getAvatarText(user?.user?.name || "")}
                       </div>
                     ) : (
                       <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-400 to-blue-500 text-white flex items-center justify-center text-lg">
