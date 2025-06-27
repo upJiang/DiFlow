@@ -66,7 +66,10 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
    * 渲染markdown内容
    */
   const renderMarkdown = () => {
-    return md.render(content);
+    // 确保content是字符串类型
+    const contentString =
+      typeof content === "string" ? content : String(content || "");
+    return md.render(contentString);
   };
 
   useEffect(() => {

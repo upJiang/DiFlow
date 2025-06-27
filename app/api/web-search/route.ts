@@ -1,27 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAnswerFromWebSearch } from "@/lib/langchain/webSearchService";
+import {
+  getAnswerFromWebSearchWithContext,
+  ChatMessage,
+} from "@/lib/langchain/webSearchService";
 
 /**
- * POST /api/web-search
- * 处理网络搜索请求
- * @param {NextRequest} request 请求对象
- * @returns {Promise<NextResponse>} 响应对象
+ * POST API route for web search with context
+ * @param {NextRequest} request - The request object
+ * @returns {Promise<NextResponse>} The response object
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const { query }: { query: string } = await request.json();
+    const {
+      query,
+      conversationHistory = [],
+    }: {
+      query: string;
+      conversationHistory?: ChatMessage[];
+    } = await request.json();
 
     if (!query || query.trim().length === 0) {
-      return NextResponse.json(
-        { success: false, error: "查询内容不能为空" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "查询不能为空" }, { status: 400 });
     }
 
     console.log(`收到网络搜索请求: "${query}"`);
 
     // 调用网络搜索服务
-    const result = await getAnswerFromWebSearch(query);
+    const result = await getAnswerFromWebSearchWithContext(
+      query,
+      conversationHistory
+    );
 
     return NextResponse.json({
       success: true,
@@ -35,12 +43,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     console.error("网络搜索API错误:", error);
     const errorMessage =
       error instanceof Error ? error.message : "网络搜索失败";
-    return NextResponse.json(
-      {
-        success: false,
-        error: errorMessage,
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

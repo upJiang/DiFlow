@@ -316,6 +316,14 @@ export default function ChatBox({
       // 如果是对话模式且开启了网络搜索，使用网络搜索API
       if (!useKnowledgeMode && useWebSearch) {
         try {
+          // 过滤掉系统消息，只传递用户和助手的对话历史用于上下文
+          const conversationHistory = messages
+            .filter((msg) => msg.role !== "system")
+            .map((msg) => ({
+              role: msg.role,
+              content: msg.content,
+            }));
+
           const response = await fetch("/api/web-search", {
             method: "POST",
             headers: {
@@ -323,6 +331,7 @@ export default function ChatBox({
             },
             body: JSON.stringify({
               query: userMessageContent,
+              conversationHistory: conversationHistory,
             }),
           });
 
@@ -351,7 +360,6 @@ export default function ChatBox({
                 metadata: {
                   title: result.title,
                   url: result.link,
-                  displayLink: result.displayLink,
                 },
               })) || [],
             usedVectorStore: false, // 网络搜索不使用向量存储

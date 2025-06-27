@@ -62,11 +62,16 @@ export function createChatModel(
  * 使用通用模型回答问题（无文档上下文）
  * @param query 用户问题
  * @param sessionId 会话ID
+ * @param conversationHistory 对话历史
  * @returns 模型回答
  */
 export async function queryGeneralModel(
   query: string,
-  sessionId?: string
+  sessionId?: string,
+  conversationHistory?: Array<{
+    role: string;
+    content: string;
+  }>
 ): Promise<string> {
   if (!query || query.trim().length === 0) {
     throw new Error("未提供问题内容");
@@ -81,61 +86,69 @@ export async function queryGeneralModel(
       }"`
     );
 
-    // 使用会话记忆
-    if (sessionId) {
+    // 构建上下文
+    let contextText = "";
+
+    // 优先使用传入的对话历史
+    if (conversationHistory && conversationHistory.length > 0) {
+      console.log(
+        `使用传入的对话历史，包含 ${conversationHistory.length} 条消息`
+      );
+
+      // 格式化对话历史
+      const formattedHistory = conversationHistory
+        .filter((msg) => msg.role !== "system") // 过滤掉系统消息
+        .slice(-8) // 保留最近8条消息
+        .map((msg) => {
+          const roleText = msg.role === "user" ? "用户" : "AI助手";
+          return `${roleText}: ${msg.content}`;
+        })
+        .join("\n");
+
+      if (formattedHistory) {
+        contextText = `以下是之前的对话历史:
+${formattedHistory}
+
+`;
+      }
+    } else if (sessionId) {
+      // 如果没有传入对话历史，则使用会话记忆
       console.log(`使用会话ID: ${sessionId} 的记忆处理问题`);
-
-      // 获取历史记录文本
       const historyText = await getFormattedHistory(sessionId);
-
-      // 构建提示模板
-      const template = historyText
-        ? `以下是之前的对话历史:
+      if (historyText) {
+        contextText = `以下是之前的对话历史:
 ${historyText}
 
-基于以上历史，回答用户的问题: {question}
-请用中文简明扼要地回答:`
-        : `请回答以下问题，如果你不确定答案，请直接说不知道，不要编造信息。
-
-问题: {question}
-
-请用中文简明扼要地回答:`;
-
-      const prompt = PromptTemplate.fromTemplate(template);
-      const formattedPrompt = await prompt.format({ question: query });
-
-      // 使用LLM直接调用
-      const response = await llm.invoke(formattedPrompt);
-      const answer =
-        typeof response.content === "string"
-          ? response.content
-          : String(response.content);
-
-      // 更新会话历史
-      await addToMemory(sessionId, query, answer);
-
-      return answer;
-    } else {
-      // 如果没有会话ID，则回退到单次调用
-      const template = `请回答以下问题，如果你不确定答案，请直接说不知道，不要编造信息。
-
-问题: {question}
-
-请用中文简明扼要地回答:`;
-
-      const prompt = PromptTemplate.fromTemplate(template);
-      const formattedPrompt = await prompt.format({ question: query });
-
-      // 使用LLM直接调用
-      const response = await llm.invoke(formattedPrompt);
-
-      // 处理响应内容
-      if (typeof response.content === "string") {
-        return response.content;
-      } else {
-        return String(response.content);
+`;
       }
     }
+
+    // 构建提示模板
+    const template = contextText
+      ? `${contextText}基于以上历史，回答用户的问题: {question}
+请用中文简明扼要地回答:`
+      : `请回答以下问题，如果你不确定答案，请直接说不知道，不要编造信息。
+
+问题: {question}
+
+请用中文简明扼要地回答:`;
+
+    const prompt = PromptTemplate.fromTemplate(template);
+    const formattedPrompt = await prompt.format({ question: query });
+
+    // 使用LLM直接调用
+    const response = await llm.invoke(formattedPrompt);
+    const answer =
+      typeof response.content === "string"
+        ? response.content
+        : String(response.content);
+
+    // 更新会话历史（如果有会话ID）
+    if (sessionId) {
+      await addToMemory(sessionId, query, answer);
+    }
+
+    return answer;
   } catch (error) {
     console.error("通用模型回答失败:", error);
     throw error;
@@ -195,12 +208,17 @@ export async function createQAChain(
  * @param query 查询文本
  * @param vectorStore 向量存储
  * @param sessionId 会话ID
+ * @param conversationHistory 对话历史
  * @returns 查询结果
  */
 export async function executeDocumentQuery(
   query: string,
   vectorStore: any,
-  sessionId?: string
+  sessionId?: string,
+  conversationHistory?: Array<{
+    role: string;
+    content: string;
+  }>
 ): Promise<{
   answer: string;
   sources: any[];
@@ -221,8 +239,42 @@ export async function executeDocumentQuery(
       }"`
     );
 
+    // 构建包含对话历史的提示模板
+    let qaTemplate = `请根据以下信息回答用户的问题。如果无法从提供的信息中找到答案，请明确告知您不知道，不要编造信息。
+
+信息:
+{context}`;
+
+    // 如果有对话历史，添加到提示中
+    if (conversationHistory && conversationHistory.length > 0) {
+      const formattedHistory = conversationHistory
+        .filter((msg) => msg.role !== "system")
+        .slice(-6) // 保留最近6条消息
+        .map((msg) => {
+          const roleText = msg.role === "user" ? "用户" : "AI助手";
+          return `${roleText}: ${msg.content}`;
+        })
+        .join("\n");
+
+      if (formattedHistory) {
+        qaTemplate = `请根据以下信息回答用户的问题。如果无法从提供的信息中找到答案，请明确告知您不知道，不要编造信息。
+
+以下是之前的对话历史:
+${formattedHistory}
+
+信息:
+{context}`;
+      }
+    }
+
+    qaTemplate += `
+
+用户问题: {input}
+
+请用中文简明扼要地回答:`;
+
     // 创建QA链
-    const qaChain = await createQAChain(vectorStore, sessionId);
+    const qaChain = await createQAChain(vectorStore, sessionId, qaTemplate);
 
     // 执行查询
     const result = await qaChain.invoke({
@@ -280,7 +332,12 @@ export async function processQuery(params: QueryParams): Promise<{
   }>;
   usedVectorStore?: boolean;
 }> {
-  const { question, sessionId, useVectorStore = false } = params;
+  const {
+    question,
+    sessionId,
+    useVectorStore = false,
+    conversationHistory,
+  } = params;
 
   if (!question || question.trim().length === 0) {
     throw new Error("问题不能为空");
@@ -296,7 +353,8 @@ export async function processQuery(params: QueryParams): Promise<{
         const result = await executeDocumentQuery(
           question,
           vectorStore,
-          sessionId
+          sessionId,
+          conversationHistory
         );
 
         return {
@@ -310,8 +368,12 @@ export async function processQuery(params: QueryParams): Promise<{
       }
     }
 
-    // 使用通用模型
-    const response = await queryGeneralModel(question, sessionId);
+    // 使用通用模型，传递对话历史
+    const response = await queryGeneralModel(
+      question,
+      sessionId,
+      conversationHistory
+    );
 
     return {
       response,
