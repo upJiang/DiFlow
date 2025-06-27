@@ -7,6 +7,7 @@ export default function GlobalChatButton() {
   const [showChatBox, setShowChatBox] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [sessionId, setSessionId] = useState<string>("");
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     // 检查用户登录状态
@@ -36,7 +37,15 @@ export default function GlobalChatButton() {
 
     checkAuth();
     initSessionId();
+    setIsInitialized(true);
   }, []);
+
+  /**
+   * 处理对话框关闭
+   */
+  const handleCloseChatBox = () => {
+    setShowChatBox(false);
+  };
 
   return (
     <>
@@ -68,12 +77,28 @@ export default function GlobalChatButton() {
         </button>
       </div>
 
-      {/* 对话框 */}
-      {showChatBox && user && sessionId && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black bg-opacity-50">
-          <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full h-[70vh] overflow-hidden">
+      {/* 对话框 - 保持挂载状态，只控制显示隐藏 */}
+      {isInitialized && user && sessionId && (
+        <div
+          className={`fixed inset-0 z-40 flex items-center justify-center p-4 bg-black bg-opacity-50 transition-opacity duration-300 ${
+            showChatBox
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
+          }`}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              handleCloseChatBox();
+            }
+          }}
+        >
+          <div
+            className={`relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full h-[70vh] overflow-hidden transform transition-transform duration-300 ${
+              showChatBox ? "scale-100" : "scale-95"
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
-              onClick={() => setShowChatBox(false)}
+              onClick={handleCloseChatBox}
               className="absolute top-4 right-4 z-10 text-gray-500 hover:text-gray-700 transition-colors"
             >
               <svg
@@ -90,7 +115,12 @@ export default function GlobalChatButton() {
                 />
               </svg>
             </button>
-            <ChatBox user={user} height="h-full" sessionId={sessionId} />
+            <ChatBox
+              user={user}
+              sessionId={sessionId}
+              onClose={handleCloseChatBox}
+              isModal={true}
+            />
           </div>
         </div>
       )}

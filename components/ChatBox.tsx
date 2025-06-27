@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, useRef } from "react";
 import { User } from "@/types/user";
 import MarkdownRenderer from "./MarkdownRenderer";
 
@@ -148,8 +148,8 @@ export default function ChatBox({
   /**
    * 上传文件并构建向量存储
    */
-  const uploadAndProcessFiles = async (files: File[]) => {
-    if (files.length === 0) return;
+  const uploadAndProcessFiles = async (files: File[]): Promise<boolean> => {
+    if (files.length === 0) return true;
 
     setUploadingFiles(true);
     setProcessingFiles(files.map((f) => f.name));
@@ -168,7 +168,7 @@ export default function ChatBox({
       files.forEach((file, index) => {
         formData.append(`file_${index}`, file);
       });
-      formData.append("sessionId", sessionId || crypto.randomUUID());
+      formData.append("sessionId", sessionId || "anonymous");
 
       const response = await fetch("/api/upload-documents", {
         method: "POST",
@@ -194,6 +194,7 @@ export default function ChatBox({
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev.slice(0, -1), successMsg]);
+        return true;
       } else {
         throw new Error(result.message || "文件处理失败");
       }
@@ -211,6 +212,7 @@ export default function ChatBox({
       onError?.(
         `文件处理失败: ${error instanceof Error ? error.message : "未知错误"}`
       );
+      return false;
     } finally {
       setUploadingFiles(false);
       setProcessingFiles([]);
@@ -266,34 +268,49 @@ export default function ChatBox({
     if (!userMessageContent && currentFiles.length === 0) return;
     if (loading || streamingMessage.content || uploadingFiles) return;
 
-    // 如果有文件需要处理，先处理文件
-    if (currentFiles.length > 0) {
-      await uploadAndProcessFiles(currentFiles);
-      setAttachedFiles([]);
-    }
-
-    // 如果只是上传文件没有问题，直接返回
-    if (!userMessageContent) {
-      return;
-    }
-
     setInputMessage("");
     setLoading(true);
 
-    // 添加用户消息
-    const userMsg: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: userMessageContent,
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, userMsg]);
-
-    setTimeout(() => {
-      scrollToBottom();
-    }, 100);
-
     try {
+      // 如果有文件需要处理，先处理文件并等待完成
+      if (currentFiles.length > 0) {
+        setAttachedFiles([]);
+
+        // 等待文件处理完成
+        const fileProcessSuccess = await uploadAndProcessFiles(currentFiles);
+
+        // 如果文件处理失败，不继续发送消息
+        if (!fileProcessSuccess) {
+          setLoading(false);
+          return;
+        }
+
+        // 文件处理成功，hasKnowledgeBase已经在uploadAndProcessFiles中设置为true
+        console.log("文件处理完成，当前知识库状态:", hasKnowledgeBase);
+
+        // 文件处理成功后，等待一小段时间确保知识库完全构建
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+
+      // 如果只是上传文件没有问题，直接返回
+      if (!userMessageContent) {
+        setLoading(false);
+        return;
+      }
+
+      // 添加用户消息
+      const userMsg: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "user",
+        content: userMessageContent,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, userMsg]);
+
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+
       // 获取认证 token
       console.log("Cookie内容:", document.cookie);
       const authToken = await getAuthToken();
@@ -323,6 +340,23 @@ export default function ChatBox({
       }
 
       // 调用新的LangChain API
+      // 过滤掉系统消息，只传递用户和助手的对话历史
+      const conversationMessages = messages.filter(
+        (msg) => msg.role !== "system"
+      );
+
+      // 如果刚刚处理了文件，直接使用true；否则使用当前状态
+      const shouldUseVectorStore =
+        currentFiles.length > 0 ? true : hasKnowledgeBase;
+
+      console.log("API调用参数:", {
+        messageCount: conversationMessages.length,
+        hasKnowledgeBase,
+        shouldUseVectorStore,
+        hadFiles: currentFiles.length > 0,
+        sessionId: sessionId || "anonymous",
+      });
+
       const response = await fetch("/api/langchain-chat", {
         method: "POST",
         headers: {
@@ -330,10 +364,10 @@ export default function ChatBox({
           Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
-          messages: [...messages, userMsg],
+          messages: [...conversationMessages, userMsg],
           files,
           sessionId: sessionId || "anonymous",
-          useVectorStore: hasKnowledgeBase,
+          useVectorStore: shouldUseVectorStore,
           temperature: 0.7,
         }),
       });
@@ -351,12 +385,11 @@ export default function ChatBox({
         throw new Error(data.error || "请求失败");
       }
 
-      // 移除文件处理的系统消息
-      if (files.length > 0) {
-        setMessages((prev) => prev.filter((msg) => msg.role !== "system"));
-        setUploadingFiles(false);
-        setAttachedFiles([]); // 清空已上传的文件
-      }
+      console.log("API响应数据:", {
+        usedVectorStore: data.data.usedVectorStore,
+        hasSources: data.data.sources?.length > 0,
+        responseLength: data.data.response?.length,
+      });
 
       // 添加AI回复
       const assistantMessage: ChatMessage = {
@@ -369,18 +402,6 @@ export default function ChatBox({
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-
-      // 如果处理了文档，显示处理结果
-      if (data.data.processedDocuments) {
-        const docInfo = data.data.processedDocuments;
-        const infoMessage: ChatMessage = {
-          id: crypto.randomUUID(),
-          role: "system",
-          content: `✅ 已成功处理 ${docInfo.count} 个文档，生成 ${docInfo.totalChunks} 个知识块。现在你可以基于上传的文档内容进行对话了！`,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, infoMessage]);
-      }
     } catch (error) {
       console.error("发送消息失败:", error);
       const errorMessage: ChatMessage = {
@@ -392,7 +413,6 @@ export default function ChatBox({
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
-      setLoading(false);
       onError?.("发送消息失败，请重试");
     } finally {
       setLoading(false);
@@ -502,11 +522,13 @@ export default function ChatBox({
 
   const chatContent = (
     <div
-      className={`bg-white rounded-2xl shadow-xl border border-gray-200 flex flex-col ${height} ${className}`}
+      className={`bg-white rounded-2xl shadow-xl border border-gray-200 flex flex-col ${
+        isModal ? "h-full" : height
+      } ${className}`}
     >
       {/* 聊天头部 */}
       {showHeader && (
-        <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-2xl">
+        <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-2xl flex-shrink-0">
           <div className="flex items-center justify-between">
             {/* 左侧：头像 + 标题 */}
             <div className="flex items-center space-x-3 flex-1 overflow-hidden">
@@ -524,12 +546,7 @@ export default function ChatBox({
             </div>
 
             {/* 右侧：按钮组 */}
-            <div
-              className="flex items-center space-x-2 flex-shrink-0 ml-4"
-              style={{
-                paddingRight: "60px",
-              }}
-            >
+            <div className="flex items-center space-x-2 flex-shrink-0 ml-4">
               {/* 记忆状态 - 只在大屏显示 */}
               <div className="hidden md:flex text-xs text-gray-500 bg-white px-2 py-1 rounded-lg flex-shrink-0">
                 💾 记忆开启
@@ -562,7 +579,7 @@ export default function ChatBox({
       )}
 
       {/* 聊天消息区域 */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden min-h-0">
         <div
           ref={chatContainerRef}
           className="h-full overflow-y-auto p-4 space-y-4"
@@ -746,7 +763,7 @@ export default function ChatBox({
       </div>
 
       {/* 输入区域 */}
-      <div className="border-t border-gray-200 p-4 bg-gray-50 rounded-b-2xl">
+      <div className="border-t border-gray-200 p-4 bg-gray-50 rounded-b-2xl flex-shrink-0">
         {/* 附件显示 */}
         {attachedFiles.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-2">
@@ -852,7 +869,7 @@ export default function ChatBox({
         onClick={handleModalClick}
       >
         <div
-          className="w-full max-w-4xl max-h-[90vh]"
+          className="w-full max-w-4xl h-[70vh]"
           onClick={(e) => e.stopPropagation()}
         >
           {chatContent}
