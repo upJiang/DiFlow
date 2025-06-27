@@ -10,6 +10,7 @@ const nextConfig = {
     OPENAI_API_ENDPOINT: process.env.OPENAI_API_ENDPOINT,
     MODEL_NAME: process.env.MODEL_NAME,
     DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
+    SERPER_API_KEY: process.env.SERPER_API_KEY,
   },
 
   // 图片优化

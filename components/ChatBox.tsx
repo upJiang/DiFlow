@@ -56,6 +56,8 @@ export default function ChatBox({
   const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
   const [hasKnowledgeBase, setHasKnowledgeBase] = useState(false);
   const [processingFiles, setProcessingFiles] = useState<string[]>([]);
+  const [useKnowledgeMode, setUseKnowledgeMode] = useState(false);
+  const [useWebSearch, setUseWebSearch] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   /**
@@ -311,6 +313,76 @@ export default function ChatBox({
         scrollToBottom();
       }, 100);
 
+      // 如果是对话模式且开启了网络搜索，使用网络搜索API
+      if (!useKnowledgeMode && useWebSearch) {
+        try {
+          const response = await fetch("/api/web-search", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              query: userMessageContent,
+            }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(
+              errorData.error || `HTTP error! status: ${response.status}`
+            );
+          }
+
+          const data = await response.json();
+
+          if (!data.success) {
+            throw new Error(data.error || "网络搜索失败");
+          }
+
+          // 添加AI回复
+          const assistantMessage: ChatMessage = {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content: data.data.response,
+            timestamp: new Date(),
+            sources:
+              data.data.searchResults?.map((result: any) => ({
+                content: result.snippet,
+                metadata: {
+                  title: result.title,
+                  url: result.link,
+                  displayLink: result.displayLink,
+                },
+              })) || [],
+            usedVectorStore: false, // 网络搜索不使用向量存储
+          };
+
+          setMessages((prev) => [...prev, assistantMessage]);
+          setLoading(false);
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+          return;
+        } catch (error) {
+          console.error("网络搜索失败:", error);
+          const errorMessage: ChatMessage = {
+            id: crypto.randomUUID(),
+            role: "system",
+            content: `网络搜索失败: ${
+              error instanceof Error ? error.message : "未知错误"
+            }`,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, errorMessage]);
+          setLoading(false);
+          setTimeout(() => {
+            scrollToBottom();
+          }, 100);
+          return;
+        }
+      }
+
+      // 原有的langchain-chat API逻辑
       // 获取认证 token
       console.log("Cookie内容:", document.cookie);
       const authToken = await getAuthToken();
@@ -345,13 +417,14 @@ export default function ChatBox({
         (msg) => msg.role !== "system"
       );
 
-      // 如果刚刚处理了文件，直接使用true；否则使用当前状态
+      // 如果刚刚处理了文件，直接使用true；否则根据用户选择的模式决定
       const shouldUseVectorStore =
-        currentFiles.length > 0 ? true : hasKnowledgeBase;
+        useKnowledgeMode && (currentFiles.length > 0 || hasKnowledgeBase);
 
       console.log("API调用参数:", {
         messageCount: conversationMessages.length,
         hasKnowledgeBase,
+        useKnowledgeMode,
         shouldUseVectorStore,
         hadFiles: currentFiles.length > 0,
         sessionId: sessionId || "anonymous",
@@ -520,6 +593,35 @@ export default function ChatBox({
     }
   }, [sessionId, user]);
 
+  /**
+   * 切换模式处理函数
+   */
+  const handleModeToggle = (enabled: boolean) => {
+    setUseKnowledgeMode(enabled);
+
+    // 如果切换到对话模式，清空已附加的文件
+    if (!enabled && attachedFiles.length > 0) {
+      setAttachedFiles([]);
+    }
+
+    // 如果切换到知识库模式但没有知识库，给用户提示
+    if (enabled && !hasKnowledgeBase) {
+      const systemMsg: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "system",
+        content:
+          "💡 您已切换到知识库模式，请先上传文档构建知识库，然后就可以基于文档内容进行智能问答了。",
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, systemMsg]);
+
+      // 3秒后自动移除提示消息
+      setTimeout(() => {
+        setMessages((prev) => prev.filter((msg) => msg.id !== systemMsg.id));
+      }, 3000);
+    }
+  };
+
   const chatContent = (
     <div
       className={`bg-white rounded-2xl shadow-xl border border-gray-200 flex flex-col ${
@@ -539,9 +641,52 @@ export default function ChatBox({
                 <h3 className="font-semibold text-gray-800 text-sm truncate">
                   DiFlow AI
                 </h3>
-                <p className="text-xs text-gray-500 truncate">
-                  {hasKnowledgeBase ? "📚 知识库模式" : "💬 对话模式"}
-                </p>
+                <div className="flex items-center space-x-2">
+                  <span className="text-xs text-gray-500">
+                    {useKnowledgeMode ? "📚 知识库模式" : "💬 对话模式"}
+                  </span>
+                  {/* 模式切换开关 */}
+                  <button
+                    onClick={() => handleModeToggle(!useKnowledgeMode)}
+                    className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none flex-shrink-0 ${
+                      useKnowledgeMode ? "bg-blue-500" : "bg-gray-300"
+                    }`}
+                    style={{ boxSizing: "border-box" }}
+                    title={
+                      useKnowledgeMode ? "切换到对话模式" : "切换到知识库模式"
+                    }
+                  >
+                    <span
+                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ease-in-out flex-shrink-0 ${
+                        useKnowledgeMode ? "translate-x-3.5" : "translate-x-0.5"
+                      }`}
+                      style={{ boxSizing: "border-box" }}
+                    />
+                  </button>
+
+                  {/* 网络搜索开关 - 只在对话模式下显示 */}
+                  {!useKnowledgeMode && (
+                    <>
+                      <span className="text-xs text-gray-400">|</span>
+                      <span className="text-xs text-gray-500">🌐 网络搜索</span>
+                      <button
+                        onClick={() => setUseWebSearch(!useWebSearch)}
+                        className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none flex-shrink-0 ${
+                          useWebSearch ? "bg-green-500" : "bg-gray-300"
+                        }`}
+                        style={{ boxSizing: "border-box" }}
+                        title={useWebSearch ? "关闭网络搜索" : "开启网络搜索"}
+                      >
+                        <span
+                          className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform duration-200 ease-in-out flex-shrink-0 ${
+                            useWebSearch ? "translate-x-3.5" : "translate-x-0.5"
+                          }`}
+                          style={{ boxSizing: "border-box" }}
+                        />
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -592,21 +737,51 @@ export default function ChatBox({
                 欢迎使用 DiFlow AI
               </h3>
               <div className="space-y-2 text-sm text-gray-600">
-                <p className="flex items-center justify-center space-x-2">
-                  <span>📄</span>
-                  <span>上传文档构建专属知识库</span>
-                </p>
-                <p className="flex items-center justify-center space-x-2">
-                  <span>💬</span>
-                  <span>基于文档内容智能问答</span>
-                </p>
-                <p className="flex items-center justify-center space-x-2">
-                  <span>🧠</span>
-                  <span>自动记忆对话历史</span>
-                </p>
+                {useKnowledgeMode ? (
+                  <>
+                    <p className="flex items-center justify-center space-x-2">
+                      <span>📚</span>
+                      <span>知识库模式 - 基于文档智能问答</span>
+                    </p>
+                    <p className="flex items-center justify-center space-x-2">
+                      <span>📄</span>
+                      <span>上传文档构建专属知识库</span>
+                    </p>
+                    <p className="flex items-center justify-center space-x-2">
+                      <span>💡</span>
+                      <span>AI将优先使用文档内容回答</span>
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="flex items-center justify-center space-x-2">
+                      <span>💬</span>
+                      <span>
+                        对话模式 -{" "}
+                        {useWebSearch ? "网络搜索增强" : "自由聊天交流"}
+                      </span>
+                    </p>
+                    <p className="flex items-center justify-center space-x-2">
+                      <span>{useWebSearch ? "🌐" : "🤖"}</span>
+                      <span>
+                        {useWebSearch
+                          ? "AI基于网络搜索结果回答"
+                          : "AI基于通用知识回答问题"}
+                      </span>
+                    </p>
+                    <p className="flex items-center justify-center space-x-2">
+                      <span>🧠</span>
+                      <span>自动记忆对话历史</span>
+                    </p>
+                  </>
+                )}
               </div>
               <div className="mt-4 text-xs text-gray-500 bg-blue-50 px-3 py-2 rounded-lg">
-                支持: PDF, DOCX, TXT, MD, CSV, JSON 格式
+                {useKnowledgeMode
+                  ? "支持: PDF, DOCX, TXT, MD, CSV, JSON 格式"
+                  : useWebSearch
+                  ? "🌐 网络搜索模式 - 获取最新信息"
+                  : "点击右上角开关切换到知识库模式或开启网络搜索"}
               </div>
             </div>
           )}
@@ -682,6 +857,14 @@ export default function ChatBox({
                           📚 知识库
                         </span>
                       )}
+                      {message.role === "assistant" &&
+                        message.sources &&
+                        message.sources.length > 0 &&
+                        !message.usedVectorStore && (
+                          <span className="ml-2 bg-blue-100 text-blue-700 px-1 rounded text-xs">
+                            🌐 网络搜索
+                          </span>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -795,9 +978,13 @@ export default function ChatBox({
                 user
                   ? attachedFiles.length > 0
                     ? "上传文件并提问..."
-                    : hasKnowledgeBase
-                    ? "基于已上传文档提问..."
-                    : placeholder
+                    : useKnowledgeMode
+                    ? hasKnowledgeBase
+                      ? "基于已上传文档提问..."
+                      : "请先上传文档构建知识库..."
+                    : useWebSearch
+                    ? "提问获取最新网络信息..."
+                    : "开始对话..."
                   : "请先登录才能使用AI助手"
               }
               rows={2}
@@ -821,12 +1008,19 @@ export default function ChatBox({
                 onClick={() => fileInputRef.current?.click()}
                 disabled={
                   !user ||
+                  !useKnowledgeMode || // 对话模式下禁用文件上传
                   loading ||
                   !!streamingMessage.content ||
                   uploadingFiles
                 }
-                className="px-3 py-2 text-gray-500 hover:text-blue-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-lg text-lg border border-gray-300 hover:border-blue-300"
-                title="上传文档构建知识库"
+                className={`px-3 py-2 text-gray-500 hover:text-blue-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-lg text-lg border border-gray-300 hover:border-blue-300 ${
+                  !useKnowledgeMode ? "bg-gray-100" : ""
+                }`}
+                title={
+                  !useKnowledgeMode
+                    ? "请切换到知识库模式后上传文档"
+                    : "上传文档构建知识库"
+                }
               >
                 📁
               </button>
