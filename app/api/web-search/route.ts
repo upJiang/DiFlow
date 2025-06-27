@@ -1,13 +1,15 @@
-import { NextResponse } from "next/server";
-import { getAnswerFromWebSearch } from "@/lib/webSearchService";
+import { NextRequest, NextResponse } from "next/server";
+import { getAnswerFromWebSearch } from "@/lib/langchain/webSearchService";
 
 /**
  * POST /api/web-search
  * 处理网络搜索请求
+ * @param {NextRequest} request 请求对象
+ * @returns {Promise<NextResponse>} 响应对象
  */
-export async function POST(request) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const { query } = await request.json();
+    const { query }: { query: string } = await request.json();
 
     if (!query || query.trim().length === 0) {
       return NextResponse.json(
@@ -29,12 +31,14 @@ export async function POST(request) {
         usedWebSearch: true,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("网络搜索API错误:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "网络搜索失败";
     return NextResponse.json(
       {
         success: false,
-        error: error.message || "网络搜索失败",
+        error: errorMessage,
       },
       { status: 500 }
     );
