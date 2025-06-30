@@ -222,9 +222,22 @@ export default function HomePage() {
             <h3 className="text-xl font-bold text-gray-800 mb-3">
               Cursor & MCP
             </h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              Cursor IDE使用技巧分享，MCP协议实践应用，提升开发效率的秘籍大全
+            <p className="text-gray-600 text-sm leading-relaxed mb-6">
+              专业的开发规则与协议指南：
+              <br />• 🎨 <strong>Cursor Rules</strong>
+              ：React、Vue、Next.js等框架开发规范
+              <br />• 🔌 <strong>MCP协议</strong>：Model Context
+              Protocol实践应用
+              <br />• 📋 <strong>代码规范</strong>：命名规范、代码质量、最佳实践
+              <br />• 🚀 <strong>效率提升</strong>：IDE配置、插件推荐、开发技巧
             </p>
+            <button
+              onClick={() => (window.location.href = "/cursor-mcp")}
+              className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-teal-600 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
+            >
+              <span>🎯</span>
+              <span>查看开发规范</span>
+            </button>
           </div>
 
           <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-orange-200 hover:-translate-y-3 animate-card-up animation-delay-400">
@@ -232,9 +245,20 @@ export default function HomePage() {
               🛠️
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-3">效率工具集</h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              精选优质效率工具推荐，涵盖开发、设计、办公等多个领域，助力提升工作效率
+            <p className="text-gray-600 text-sm leading-relaxed mb-6">
+              精选实用的在线开发工具：
+              <br />• 📄 <strong>JSON格式化</strong>：格式化、压缩、验证JSON数据
+              <br />• 🔍 <strong>正则测试</strong>：实时测试正则表达式匹配
+              <br />• 🍎 <strong>Mac软件</strong>：开发、设计、生产力工具推荐
+              <br />• 🔐 <strong>编码工具</strong>：Base64、URL编码、Hash生成等
             </p>
+            <button
+              onClick={() => (window.location.href = "/tools")}
+              className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
+            >
+              <span>🛠️</span>
+              <span>探索工具集</span>
+            </button>
           </div>
         </div>
       </div>
