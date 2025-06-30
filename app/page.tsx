@@ -256,6 +256,147 @@ export default function HomePage() {
             </button>
           </div>
         </div>
+
+        {/* SEO内容区域 */}
+        <div className="mt-20 max-w-4xl mx-auto">
+          {/* 关于DiFlow */}
+          <section className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 mb-12 shadow-lg border border-gray-100">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+              为什么选择 DiFlow AI 工作流平台？
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  🚀 专为程序员设计
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  DiFlow深度理解程序员的工作需求，提供代码辅助、技术文档分析、API文档查询等专业功能。
+                  无论是前端开发、后端架构还是全栈开发，DiFlow都能成为您的得力助手。
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  🧠 智能化工作流
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  通过AI驱动的智能工作流，DiFlow能够自动化处理重复性任务，让您专注于创造性工作。
+                  从需求分析到代码生成，从测试到部署，全流程智能化支持。
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  📚 强大的知识库
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  DiFlow支持上传各种技术文档、API文档、项目文档，构建专属知识库。
+                  通过向量搜索和语义理解，快速找到所需信息，提升工作效率。
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  🌐 实时信息获取
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  集成网络搜索功能，DiFlow能够获取最新的技术资讯、开源项目、解决方案。
+                  让您始终保持技术前沿，掌握最新的开发动态。
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* 功能特色详解 */}
+          <section className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 mb-12 border border-blue-100">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+              DiFlow 核心功能详解
+            </h2>
+            <div className="space-y-6">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-xl flex-shrink-0">
+                  💬
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    AI智能对话系统
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    DiFlow的AI对话系统基于先进的大语言模型，支持上下文记忆、多轮对话、代码生成等功能。
+                    无论是技术咨询、代码调试还是架构设计，DiFlow都能提供专业的建议和解决方案。
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-xl flex-shrink-0">
+                  📄
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    文档智能分析
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    上传PDF、Word、Markdown等格式的技术文档，DiFlow能够智能解析内容，
+                    构建知识图谱，支持基于文档内容的精准问答和信息检索。
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white text-xl flex-shrink-0">
+                  🔍
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                    网络搜索增强
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    集成实时网络搜索，DiFlow能够获取最新的技术资讯、开源项目、API文档等信息，
+                    结合AI分析能力，为您提供准确、及时的技术支持。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 使用场景 */}
+          <section className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-100">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+              DiFlow 适用场景
+            </h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4">
+                  👨‍💻
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  软件开发
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  代码审查、架构设计、技术选型、调试支持
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4">
+                  📊
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  项目管理
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  需求分析、进度跟踪、文档管理、团队协作
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4">
+                  🎓
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  技术学习
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  知识整理、概念理解、最佳实践、技能提升
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );

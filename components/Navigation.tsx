@@ -133,11 +133,23 @@ export function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link
-              href="/"
-              className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
-            >
-              DiFlow
+            <Link href="/" className="flex items-center space-x-3 group">
+              {/* DiFlow Logo Icon */}
+              <div className="relative">
+                <span className="text-2xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-pulse">
+                  ⚡
+                </span>
+                {/* 微妙的发光效果 */}
+                <div className="absolute inset-0 text-2xl blur-sm opacity-30 group-hover:opacity-50 transition-opacity duration-300">
+                  <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    ⚡
+                  </span>
+                </div>
+              </div>
+              {/* DiFlow 文字 */}
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent group-hover:from-blue-500 group-hover:to-purple-500 transition-all duration-300">
+                DiFlow
+              </span>
             </Link>
           </div>
 
