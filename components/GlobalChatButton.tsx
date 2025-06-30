@@ -8,6 +8,7 @@ export default function GlobalChatButton() {
   const [user, setUser] = useState<any>(null);
   const [sessionId, setSessionId] = useState<string>("");
   const [isInitialized, setIsInitialized] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   useEffect(() => {
     // 检查用户登录状态
@@ -40,11 +41,40 @@ export default function GlobalChatButton() {
     setIsInitialized(true);
   }, []);
 
+  // 自动消失定时器
+  useEffect(() => {
+    if (showLoginPrompt) {
+      const timer = setTimeout(() => {
+        setShowLoginPrompt(false);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [showLoginPrompt]);
+
+  /**
+   * 处理聊天按钮点击
+   */
+  const handleChatButtonClick = () => {
+    if (!user) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    setShowChatBox(!showChatBox);
+  };
+
   /**
    * 处理对话框关闭
    */
   const handleCloseChatBox = () => {
     setShowChatBox(false);
+  };
+
+  /**
+   * 处理登录提示弹窗关闭
+   */
+  const handleCloseLoginPrompt = () => {
+    setShowLoginPrompt(false);
   };
 
   return (
@@ -53,7 +83,7 @@ export default function GlobalChatButton() {
       <div className="fixed bottom-6 right-6 z-50">
         <button
           data-global-chat-button
-          onClick={() => setShowChatBox(!showChatBox)}
+          onClick={handleChatButtonClick}
           className="group bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 relative"
           title="快速对话"
         >
@@ -125,6 +155,128 @@ export default function GlobalChatButton() {
           </div>
         </div>
       )}
+
+      {/* 登录提示弹窗 */}
+      {showLoginPrompt && (
+        <div className="fixed top-4 right-4 z-50">
+          <div
+            className={`bg-white rounded-lg shadow-2xl border border-gray-200 p-4 max-w-sm transform transition-all duration-500 ease-out ${
+              showLoginPrompt
+                ? "translate-x-0 opacity-100"
+                : "translate-x-full opacity-0"
+            }`}
+            style={{
+              animation: showLoginPrompt
+                ? "slideInFromRight 0.5s ease-out forwards"
+                : "slideOutToRight 0.3s ease-in forwards",
+            }}
+          >
+            {/* 关闭按钮 */}
+            <button
+              onClick={handleCloseLoginPrompt}
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
+            {/* 通知内容 */}
+            <div className="flex items-start space-x-3 pr-6">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                  需要登录
+                </h4>
+                <p className="text-sm text-gray-600 mb-3">
+                  请先登录您的账户，然后就可以开始与 AI 对话了
+                </p>
+
+                <button
+                  onClick={() => {
+                    handleCloseLoginPrompt();
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm rounded-md hover:from-blue-600 hover:to-purple-700 transition-all"
+                >
+                  去登录
+                </button>
+              </div>
+            </div>
+
+            {/* 进度条 */}
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-100 rounded-b-lg overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-blue-500 to-purple-600 rounded-b-lg"
+                style={{
+                  animation: "progressBar 3s linear forwards",
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 添加动画样式 */}
+      <style jsx>{`
+        @keyframes slideInFromRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes slideOutToRight {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+        }
+
+        @keyframes progressBar {
+          from {
+            width: 100%;
+          }
+          to {
+            width: 0%;
+          }
+        }
+      `}</style>
     </>
   );
 }

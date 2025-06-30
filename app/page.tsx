@@ -56,12 +56,7 @@ export default function HomePage() {
    * 打开AI对话弹窗 - 触发GlobalChatButton的显示
    */
   const openChatBox = () => {
-    if (!user) {
-      setError("请先登录Google账号才能使用AI对话功能");
-      return;
-    }
-
-    // 触发GlobalChatButton显示对话框
+    // 直接触发GlobalChatButton的点击，让它处理登录检查和显示逻辑
     const globalChatButton = document.querySelector(
       "[data-global-chat-button]"
     ) as HTMLButtonElement;
