@@ -239,20 +239,64 @@ export default function ChatBox({
   };
 
   /**
-   * 获取认证 token
+   * 获取认证 token（增强版，支持重试和缓存）
    */
   const getAuthToken = async (): Promise<string | null> => {
-    try {
-      const response = await fetch("/api/auth/token");
-      if (response.ok) {
-        const data = await response.json();
-        return data.token;
+    const maxRetries = 3;
+    const retryDelay = 500; // 500ms
+    const requestTimeout = 5000; // 5秒超时
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`获取认证token - 尝试 ${attempt}/${maxRetries}`);
+
+        // 创建带超时的请求
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), requestTimeout);
+
+        const response = await fetch("/api/auth/token", {
+          signal: controller.signal,
+          headers: {
+            "Cache-Control": "no-cache",
+            Pragma: "no-cache",
+          },
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.token) {
+            console.log(`认证token获取成功 - 尝试 ${attempt}/${maxRetries}`);
+            return data.token;
+          } else {
+            console.warn(`认证token为空 - 尝试 ${attempt}/${maxRetries}`);
+          }
+        } else {
+          console.warn(
+            `认证API响应错误: ${response.status} - 尝试 ${attempt}/${maxRetries}`
+          );
+        }
+      } catch (error) {
+        console.error(
+          `获取认证token失败 - 尝试 ${attempt}/${maxRetries}:`,
+          error
+        );
+
+        // 如果是最后一次尝试，不再重试
+        if (attempt === maxRetries) {
+          console.error("所有认证token获取尝试均失败");
+          return null;
+        }
+
+        // 等待后重试
+        await new Promise((resolve) =>
+          setTimeout(resolve, retryDelay * attempt)
+        );
       }
-      return null;
-    } catch (error) {
-      console.error("获取认证token失败:", error);
-      return null;
     }
+
+    return null;
   };
 
   /**
@@ -397,7 +441,12 @@ export default function ChatBox({
       console.log("获取到的token:", authToken ? "存在" : "不存在");
 
       if (!authToken) {
-        throw new Error("未找到认证令牌，请重新登录");
+        // 提供更友好的错误提示，建议用户重试
+        const friendlyError = new Error(
+          "认证状态异常，请稍后重试或刷新页面重新登录"
+        );
+        friendlyError.name = "AuthTokenError";
+        throw friendlyError;
       }
 
       // 准备文件数据 - 将File对象转换为可序列化的格式
@@ -485,16 +534,49 @@ export default function ChatBox({
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error("发送消息失败:", error);
+
+      // 根据错误类型提供不同的提示
+      let errorContent = "";
+      let shouldShowRetryHint = false;
+
+      if (error instanceof Error) {
+        if (error.name === "AuthTokenError") {
+          errorContent = `🔐 ${error.message}`;
+          shouldShowRetryHint = true;
+        } else if (
+          error.message.includes("网络") ||
+          error.message.includes("timeout") ||
+          error.message.includes("fetch")
+        ) {
+          errorContent = `🌐 网络连接异常: ${error.message}`;
+          shouldShowRetryHint = true;
+        } else {
+          errorContent = `❌ 发送失败: ${error.message}`;
+          shouldShowRetryHint = true;
+        }
+      } else {
+        errorContent = "❌ 发送失败: 未知错误";
+        shouldShowRetryHint = true;
+      }
+
       const errorMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: "system",
-        content: `发送失败: ${
-          error instanceof Error ? error.message : "未知错误"
-        }`,
+        content:
+          errorContent +
+          (shouldShowRetryHint
+            ? "\n💡 建议：点击重新发送或刷新页面后重试"
+            : ""),
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
-      onError?.("发送消息失败，请重试");
+
+      // 为认证错误提供特殊的错误回调
+      if (error instanceof Error && error.name === "AuthTokenError") {
+        onError?.("认证状态异常，请重试或刷新页面");
+      } else {
+        onError?.("发送消息失败，请重试");
+      }
     } finally {
       setLoading(false);
     }
@@ -530,7 +612,9 @@ export default function ChatBox({
         // 获取认证 token
         const authToken = await getAuthToken();
         if (!authToken) {
-          console.warn("未找到认证令牌，无法清除服务器端会话记忆");
+          console.warn(
+            "认证状态异常，无法清除服务器端会话记忆，但本地聊天记录已清空"
+          );
           return;
         }
 
