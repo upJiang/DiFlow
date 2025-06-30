@@ -55,7 +55,7 @@ export async function getAnswerFromWebSearchWithContext(
   options: Record<string, any> = {}
 ): Promise<SearchResponse> {
   // 确保有API密钥
-  const serperApiKey = process.env.SERPER_API_KEY;
+  const serperApiKey = process.env.NEXT_PUBLIC_SERPER_API_KEY;
   if (!serperApiKey) {
     console.error("缺少SERPER_API_KEY环境变量");
     return {
@@ -290,7 +290,7 @@ export async function searchWeb(
   }
 
   // 使用环境变量中的API密钥
-  const apiKey = process.env.SERPER_API_KEY;
+  const apiKey = process.env.NEXT_PUBLIC_SERPER_API_KEY;
   if (!apiKey) {
     throw new Error("未设置SERPER_API_KEY环境变量");
   }

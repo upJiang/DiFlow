@@ -73,7 +73,7 @@ function decodeGoogleJWT(token: string) {
     }
 
     // 验证audience (client_id)
-    const expectedClientId = process.env.GOOGLE_CLIENT_ID;
+    const expectedClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (userInfo.aud !== expectedClientId) {
       throw new Error("Invalid JWT audience");
     }

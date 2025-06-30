@@ -48,7 +48,7 @@
 
 ```bash
 # .env
-GOOGLE_CLIENT_ID=your_google_client_id
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
 JWT_PRIVATE_KEY=your_jwt_secret_key
 DATABASE_URL="mysql://user:password@host:port/database?charset=utf8mb4&collation=utf8mb4_unicode_ci"
 ```
@@ -290,7 +290,7 @@ function decodeGoogleJWT(token: string) {
     }
 
     // 验证audience (client_id)
-    const expectedClientId = process.env.GOOGLE_CLIENT_ID;
+    const expectedClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (userInfo.aud !== expectedClientId) {
       throw new Error("Invalid JWT audience");
     }

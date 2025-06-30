@@ -4,12 +4,12 @@ DiFlow 是一个集成对话、工作流和工具的智能平台，采用现代�
 
 ## 🚀 功能特性
 
-- **智能对话**: 与AI进行自然对话，支持多轮对话和历史记录
+- **智能对话**: 与 AI 进行自然对话，支持多轮对话和历史记录
 - **工作流管理**: 可视化设计和执行自动化工作流程
 - **实用工具**: 丰富的工具集合，包括文本处理、数据分析等
-- **Google OAuth**: 安全便捷的Google账号登录
+- **Google OAuth**: 安全便捷的 Google 账号登录
 - **响应式设计**: 支持桌面和移动设备
-- **现代化UI**: 采用卡通风格设计，视觉体验舒适
+- **现代化 UI**: 采用卡通风格设计，视觉体验舒适
 
 ## 🛠️ 技术栈
 
@@ -18,7 +18,7 @@ DiFlow 是一个集成对话、工作流和工具的智能平台，采用现代�
 - **状态管理**: Pinia
 - **数据库**: MySQL + Prisma ORM
 - **认证**: JWT + Google OAuth 2.0
-- **AI集成**: DeepSeek API
+- **AI 集成**: DeepSeek API
 
 ## 📦 安装和设置
 
@@ -53,7 +53,7 @@ DATABASE_URL="mysql://username:password@localhost:3306/diflow"
 JWT_SECRET="your-jwt-secret-key-here"
 
 # Google OAuth 配置
-GOOGLE_CLIENT_ID="your-google-client-id"
+NEXT_PUBLIC_GOOGLE_CLIENT_ID="your-google-client-id"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
 
 # OpenAI API 配置 (用于 DeepSeek)
@@ -89,17 +89,17 @@ npm run dev
 - `npm run lint` - 运行代码检查
 - `npm run db:push` - 推送数据库架构
 - `npm run db:migrate` - 运行数据库迁移
-- `npm run db:generate` - 生成Prisma客户端
-- `npm run db:studio` - 启动Prisma Studio
+- `npm run db:generate` - 生成 Prisma 客户端
+- `npm run db:studio` - 启动 Prisma Studio
 
 ## 🔐 Google OAuth 设置
 
 1. 访问 [Google Cloud Console](https://console.cloud.google.com/)
 2. 创建新项目或选择现有项目
 3. 启用 Google+ API
-4. 创建 OAuth 2.0 客户端ID
-5. 设置授权重定向URI：`http://localhost:3333/auth/callback`
-6. 将客户端ID和密钥添加到 `.env` 文件
+4. 创建 OAuth 2.0 客户端 ID
+5. 设置授权重定向 URI：`http://localhost:3333/auth/callback`
+6. 将客户端 ID 和密钥添加到 `.env` 文件
 
 ## 📁 项目结构
 

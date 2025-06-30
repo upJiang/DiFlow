@@ -42,7 +42,7 @@ theme: z-blue
     EMBEDDING_API_KEY=sk-
 
     # https://serper.dev/ 网络搜索配置
-    SERPER_API_KEY=
+    NEXT_PUBLIC_SERPER_API_KEY=
 
 ## 项目概览
 
@@ -523,7 +523,7 @@ export async function executeAgentQuery(query, options) {
     const tools = [
       // 网络搜索工具
       new Serper({
-        apiKey: process.env.SERPER_API_KEY,
+        apiKey: process.env.NEXT_PUBLIC_SERPER_API_KEY,
         gl: "cn", // 地区设置为中国
         hl: "zh-cn", // 语言设置为中文
       }),
@@ -1397,7 +1397,7 @@ const CACHE_TTL = 60 * 60 * 1000; // 1小时
  */
 export async function getAnswerFromWebSearch(query, options = {}) {
   // 确保有API密钥
-  const serperApiKey = process.env.SERPER_API_KEY;
+  const serperApiKey = process.env.NEXT_PUBLIC_SERPER_API_KEY;
   if (!serperApiKey) {
     console.error("缺少SERPER_API_KEY环境变量");
     return {
