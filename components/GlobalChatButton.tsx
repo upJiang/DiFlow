@@ -52,6 +52,7 @@ export default function GlobalChatButton() {
       {/* 悬浮对话按钮 */}
       <div className="fixed bottom-6 right-6 z-50">
         <button
+          data-global-chat-button
           onClick={() => setShowChatBox(!showChatBox)}
           className="group bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 relative"
           title="快速对话"

@@ -52,6 +52,24 @@ export default function HomePage() {
     }
   };
 
+  /**
+   * 打开AI对话弹窗 - 触发GlobalChatButton的显示
+   */
+  const openChatBox = () => {
+    if (!user) {
+      setError("请先登录Google账号才能使用AI对话功能");
+      return;
+    }
+
+    // 触发GlobalChatButton显示对话框
+    const globalChatButton = document.querySelector(
+      "[data-global-chat-button]"
+    ) as HTMLButtonElement;
+    if (globalChatButton) {
+      globalChatButton.click();
+    }
+  };
+
   useEffect(() => {
     fetchUser();
 
@@ -181,9 +199,20 @@ export default function HomePage() {
               ⚡️
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-3">AI智能对话</h3>
-            <p className="text-gray-600 text-sm leading-relaxed">
-              基于先进大语言模型，支持文档上传分析，智能问答，上下文记忆，让AI成为你的专属智能助手
+            <p className="text-gray-600 text-sm leading-relaxed mb-6">
+              强大的AI助手，支持多种交互模式：
+              <br />• 💬 <strong>对话模式</strong>：自由聊天，上下文记忆
+              <br />• 🌐 <strong>网络搜索</strong>：获取最新信息，实时搜索
+              <br />• 📚 <strong>知识库模式</strong>：上传文档，智能分析问答
+              <br />• 📄 支持PDF、DOCX、TXT、MD等多种格式
             </p>
+            <button
+              onClick={openChatBox}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
+            >
+              <span>⚡</span>
+              <span>立即体验AI对话</span>
+            </button>
           </div>
 
           <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-green-200 hover:-translate-y-3 animate-card-up animation-delay-200">
