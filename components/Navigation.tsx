@@ -200,6 +200,17 @@ export function Navigation() {
               </svg>
             </button>
 
+            {/* 博客主页链接 */}
+            <a
+              href="https://junfeng530.xyz/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex items-center space-x-2 px-2 py-1 text-gray-600 hover:text-blue-600 transition-colors duration-200"
+            >
+              <span className="text-lg">📝</span>
+              <span className="font-medium">我的博客</span>
+            </a>
+
             {loading ? (
               <div className="w-10 h-10 bg-gradient-to-r from-gray-200 to-gray-300 rounded-full animate-pulse"></div>
             ) : user ? (
@@ -329,6 +340,17 @@ export function Navigation() {
               <span className="text-xl">🛠️</span>
               <span className="font-medium">效率工具</span>
             </Link>
+
+            {/* 博客主页链接 - 移动端 */}
+            <a
+              href="https://junfeng530.xyz/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-gray-600 hover:text-blue-600"
+            >
+              <span className="text-xl">📝</span>
+              <span className="font-medium">我的博客</span>
+            </a>
           </div>
         </div>
       )}
