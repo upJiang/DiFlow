@@ -7,6 +7,7 @@ export default function JsonFormatterPage() {
   const [output, setOutput] = useState("");
   const [error, setError] = useState("");
   const [isValid, setIsValid] = useState(true);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const formatJson = () => {
     try {
@@ -52,7 +53,8 @@ export default function JsonFormatterPage() {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      alert("已复制到剪贴板");
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
     } catch (err) {
       console.error("复制失败:", err);
     }
@@ -149,9 +151,14 @@ export default function JsonFormatterPage() {
               {output && (
                 <button
                   onClick={() => copyToClipboard(output)}
-                  className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors relative"
                 >
                   📋 复制
+                  {copySuccess && (
+                    <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                      已复制到剪贴板
+                    </div>
+                  )}
                 </button>
               )}
             </div>

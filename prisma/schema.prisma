@@ -18,7 +18,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  chats     Chat[]   // 用户的聊天记录
+  chats          Chat[]         // 用户的聊天记录
+  noteCategories NoteCategory[] // 用户的笔记分类
+  notes          Note[]         // 用户的笔记
 
   @@map("users")
 }
@@ -48,4 +50,37 @@ model ModelConfig {
   updatedAt   DateTime @updatedAt
 
   @@map("model_configs")
+}
+
+// 笔记分类表
+model NoteCategory {
+  id        String   @id @default(cuid())
+  name      String   // 分类名称
+  color     String   @default("#3B82F6") // 分类颜色
+  userId    String   // 用户ID
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes Note[] // 该分类下的笔记
+  
+  @@unique([userId, name]) // 同一用户下分类名不能重复
+  @@map("note_categories")
+}
+
+// 笔记表
+model Note {
+  id         String   @id @default(cuid())
+  title      String   // 笔记标题
+  content    String   @db.Text // 笔记内容(Markdown格式)
+  fileName   String   // 文件名(用于搜索和展示)
+  categoryId String   // 分类ID
+  userId     String   // 用户ID
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category NoteCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  @@map("notes")
 }

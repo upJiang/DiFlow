@@ -153,7 +153,7 @@ export function Navigation() {
             </Link>
           </div>
 
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center">
             <Link
               href="/"
               className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
@@ -176,6 +176,18 @@ export function Navigation() {
             >
               <span className="text-xl">🎯</span>
               <span className="font-medium">Cursor & MCP</span>
+            </Link>
+
+            <Link
+              href="/notes"
+              className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                isActivePath("/notes")
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+              }`}
+            >
+              <span className="text-xl">📝</span>
+              <span className="font-medium">随手记</span>
             </Link>
 
             <Link
@@ -338,6 +350,19 @@ export function Navigation() {
             >
               <span className="text-xl">🎯</span>
               <span className="font-medium">Cursor & MCP</span>
+            </Link>
+
+            <Link
+              href="/notes"
+              onClick={() => setShowMobileMenu(false)}
+              className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                isActivePath("/notes")
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+              }`}
+            >
+              <span className="text-xl">📝</span>
+              <span className="font-medium">随手记</span>
             </Link>
 
             <Link

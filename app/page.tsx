@@ -188,13 +188,13 @@ export default function HomePage() {
         </div>
 
         {/* 功能特色卡片 */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-blue-200 hover:-translate-y-3 animate-card-up">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-blue-200 hover:-translate-y-3 animate-card-up flex flex-col">
             <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
               ⚡️
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-3">AI智能对话</h3>
-            <p className="text-gray-600 text-sm leading-relaxed mb-6">
+            <p className="text-gray-600 text-sm leading-relaxed mb-6 flex-1">
               强大的AI助手，支持多种交互模式：
               <br />• 💬 <strong>对话模式</strong>：自由聊天，上下文记忆
               <br />• 🌐 <strong>网络搜索</strong>：获取最新信息，实时搜索
@@ -203,21 +203,42 @@ export default function HomePage() {
             </p>
             <button
               onClick={openChatBox}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-purple-600 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2 mt-auto"
             >
               <span>⚡</span>
               <span>立即体验AI对话</span>
             </button>
           </div>
 
-          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-green-200 hover:-translate-y-3 animate-card-up animation-delay-200">
+          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-yellow-200 hover:-translate-y-3 animate-card-up animation-delay-100 flex flex-col">
+            <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
+              📝
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-3">随手记</h3>
+            <p className="text-gray-600 text-sm leading-relaxed mb-6 flex-1">
+              智能Markdown笔记系统，随时记录灵感：
+              <br />• ✍️ <strong>Markdown支持</strong>：富文本编辑，格式美观
+              <br />• 🏷️ <strong>分类管理</strong>：多彩标签，条理清晰
+              <br />• 🔍 <strong>快速搜索</strong>：标题内容，即时查找
+              <br />• ☁️ <strong>云端同步</strong>：数据安全，多端访问
+            </p>
+            <button
+              onClick={() => (window.location.href = "/notes")}
+              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-3 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2 mt-auto"
+            >
+              <span>📝</span>
+              <span>开始记录笔记</span>
+            </button>
+          </div>
+
+          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-green-200 hover:-translate-y-3 animate-card-up animation-delay-200 flex flex-col">
             <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
               🎯
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-3">
               Cursor & MCP
             </h3>
-            <p className="text-gray-600 text-sm leading-relaxed mb-6">
+            <p className="text-gray-600 text-sm leading-relaxed mb-6 flex-1">
               专业的开发规则与协议指南：
               <br />• 🎨 <strong>Cursor Rules</strong>
               ：React、Vue、Next.js等框架开发规范
@@ -228,19 +249,19 @@ export default function HomePage() {
             </p>
             <button
               onClick={() => (window.location.href = "/cursor-mcp")}
-              className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-teal-600 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
+              className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-teal-600 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2 mt-auto"
             >
               <span>🎯</span>
               <span>查看开发规范</span>
             </button>
           </div>
 
-          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-orange-200 hover:-translate-y-3 animate-card-up animation-delay-400">
+          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-orange-200 hover:-translate-y-3 animate-card-up animation-delay-400 flex flex-col">
             <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
               🛠️
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-3">效率工具集</h3>
-            <p className="text-gray-600 text-sm leading-relaxed mb-6">
+            <p className="text-gray-600 text-sm leading-relaxed mb-6 flex-1">
               精选实用的在线开发工具：
               <br />• 📄 <strong>JSON格式化</strong>：格式化、压缩、验证JSON数据
               <br />• 🔍 <strong>正则测试</strong>：实时测试正则表达式匹配
@@ -249,7 +270,7 @@ export default function HomePage() {
             </p>
             <button
               onClick={() => (window.location.href = "/tools")}
-              className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2"
+              className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-xl hover:from-orange-600 hover:to-red-600 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center space-x-2 mt-auto"
             >
               <span>🛠️</span>
               <span>探索工具集</span>
@@ -258,7 +279,7 @@ export default function HomePage() {
         </div>
 
         {/* SEO内容区域 */}
-        <div className="mt-20 max-w-4xl mx-auto">
+        <div className="mt-20 max-w-6xl mx-auto">
           {/* 关于DiFlow */}
           <section className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 mb-12 shadow-lg border border-gray-100">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
@@ -304,98 +325,127 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* 功能特色详解 */}
-          <section className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 mb-12 border border-blue-100">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-              DiFlow 核心功能详解
-            </h2>
-            <div className="space-y-6">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-xl flex-shrink-0">
-                  💬
+          {/* 功能特色详解和使用场景 */}
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* 功能特色详解 */}
+            <section className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+                DiFlow 核心功能详解
+              </h2>
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white text-lg flex-shrink-0">
+                    💬
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                      AI智能对话系统
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed text-sm">
+                      基于先进的大语言模型，支持上下文记忆、多轮对话、代码生成等功能。
+                      提供专业的技术咨询和解决方案。
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                    AI智能对话系统
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    DiFlow的AI对话系统基于先进的大语言模型，支持上下文记忆、多轮对话、代码生成等功能。
-                    无论是技术咨询、代码调试还是架构设计，DiFlow都能提供专业的建议和解决方案。
-                  </p>
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center text-white text-lg flex-shrink-0">
+                    📝
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                      随手记笔记系统
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed text-sm">
+                      支持Markdown格式编辑，提供分类管理和快速搜索功能。
+                      高效整理和管理技术知识。
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white text-lg flex-shrink-0">
+                    📄
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                      文档智能分析
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed text-sm">
+                      智能解析PDF、Word、Markdown等格式文档，
+                      构建知识图谱，支持精准问答和信息检索。
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white text-lg flex-shrink-0">
+                    🔍
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                      网络搜索增强
+                    </h3>
+                    <p className="text-gray-600 leading-relaxed text-sm">
+                      获取最新技术资讯、开源项目、API文档等信息，
+                      结合AI分析提供准确、及时的技术支持。
+                    </p>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-xl flex-shrink-0">
-                  📄
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                    文档智能分析
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    上传PDF、Word、Markdown等格式的技术文档，DiFlow能够智能解析内容，
-                    构建知识图谱，支持基于文档内容的精准问答和信息检索。
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white text-xl flex-shrink-0">
-                  🔍
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                    网络搜索增强
-                  </h3>
-                  <p className="text-gray-600 leading-relaxed">
-                    集成实时网络搜索，DiFlow能够获取最新的技术资讯、开源项目、API文档等信息，
-                    结合AI分析能力，为您提供准确、及时的技术支持。
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
+            </section>
 
-          {/* 使用场景 */}
-          <section className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-100">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
-              DiFlow 适用场景
-            </h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4">
-                  👨‍💻
+            {/* 使用场景 */}
+            <section className="bg-white/60 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+                DiFlow 适用场景
+              </h2>
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-xl flex-shrink-0">
+                    👨‍💻
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                      软件开发
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      代码审查、架构设计、技术选型、调试支持
+                      <br />
+                      提供全方位的开发辅助和技术指导
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  软件开发
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  代码审查、架构设计、技术选型、调试支持
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4">
-                  📊
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center text-white text-xl flex-shrink-0">
+                    📊
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                      项目管理
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      需求分析、进度跟踪、文档管理、团队协作
+                      <br />
+                      提升项目管理效率和团队协作质量
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  项目管理
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  需求分析、进度跟踪、文档管理、团队协作
-                </p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto mb-4">
-                  🎓
+                <div className="flex items-start space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white text-xl flex-shrink-0">
+                    🎓
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                      技术学习
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      知识整理、概念理解、最佳实践、技能提升
+                      <br />
+                      加速技术学习和知识积累过程
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                  技术学习
-                </h3>
-                <p className="text-gray-600 text-sm">
-                  知识整理、概念理解、最佳实践、技能提升
-                </p>
               </div>
-            </div>
-          </section>
+            </section>
+          </div>
         </div>
       </div>
     </div>

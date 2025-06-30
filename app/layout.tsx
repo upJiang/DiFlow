@@ -13,13 +13,17 @@ export const metadata: Metadata = {
     template: "%s | DiFlow - AI智能工作流平台",
   },
   description:
-    "DiFlow是专为程序员和知识工作者打造的AI智能工作流平台，集成AI对话、文档智能分析、网络搜索等功能。提供知识库问答、代码辅助、工作流自动化等服务，让AI助力提升工作效率。",
+    "DiFlow是专为程序员和知识工作者打造的AI智能工作流平台，集成AI对话、随手记笔记、文档智能分析、网络搜索等功能。提供知识库问答、Markdown笔记管理、代码辅助、工作流自动化等服务，让AI助力提升工作效率。",
   keywords: [
     "DiFlow",
     "AI工作流",
     "AI助手",
     "程序员工具",
     "智能对话",
+    "随手记",
+    "Markdown笔记",
+    "笔记管理",
+    "分类笔记",
     "文档分析",
     "知识库",
     "AI聊天",
@@ -53,7 +57,7 @@ export const metadata: Metadata = {
     url: "https://diflow.ai",
     title: "DiFlow - AI智能工作流平台 | 程序员效率工具",
     description:
-      "DiFlow是专为程序员和知识工作者打造的AI智能工作流平台，集成AI对话、文档智能分析、网络搜索等功能。提供知识库问答、代码辅助、工作流自动化等服务。",
+      "DiFlow是专为程序员和知识工作者打造的AI智能工作流平台，集成AI对话、随手记笔记、文档智能分析、网络搜索等功能。提供知识库问答、Markdown笔记管理、代码辅助、工作流自动化等服务。",
     siteName: "DiFlow",
     images: [
       {
@@ -68,7 +72,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "DiFlow - AI智能工作流平台 | 程序员效率工具",
     description:
-      "DiFlow是专为程序员和知识工作者打造的AI智能工作流平台，集成AI对话、文档智能分析、网络搜索等功能。",
+      "DiFlow是专为程序员和知识工作者打造的AI智能工作流平台，集成AI对话、随手记笔记、文档智能分析、网络搜索等功能。",
     images: ["/og-image.png"],
     creator: "@DiFlow",
   },
@@ -159,6 +163,7 @@ export default function RootLayout({
               },
               featureList: [
                 "AI智能对话",
+                "随手记笔记",
                 "文档智能分析",
                 "知识库问答",
                 "网络搜索增强",

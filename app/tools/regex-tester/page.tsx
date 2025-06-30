@@ -15,6 +15,7 @@ export default function RegexTesterPage() {
   const [matches, setMatches] = useState<RegexMatch[]>([]);
   const [error, setError] = useState("");
   const [isValid, setIsValid] = useState(true);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // 常用正则表达式模板
   const regexTemplates = [
@@ -127,7 +128,8 @@ export default function RegexTesterPage() {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      alert("已复制到剪贴板");
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
     } catch (err) {
       console.error("复制失败:", err);
     }
@@ -264,9 +266,14 @@ export default function RegexTesterPage() {
                     onClick={() =>
                       copyToClipboard(matches.map((m) => m.match).join("\n"))
                     }
-                    className="px-3 py-1 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                    className="px-3 py-1 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors relative"
                   >
                     📋 复制结果
+                    {copySuccess && (
+                      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-green-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                        已复制到剪贴板
+                      </div>
+                    )}
                   </button>
                 )}
               </div>
