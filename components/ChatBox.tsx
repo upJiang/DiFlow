@@ -873,7 +873,7 @@ export default function ChatBox({
                   ? "支持: PDF, DOCX, TXT, MD, CSV, JSON 格式"
                   : useWebSearch
                   ? "🌐 网络搜索模式 - 获取最新信息"
-                  : "点击右上角开关切换到知识库模式或开启网络搜索"}
+                  : "点击左上角开关切换到知识库模式或开启网络搜索"}
               </div>
             </div>
           )}

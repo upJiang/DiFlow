@@ -30,6 +30,7 @@ export default function NoteEditor({
   const [isPreview, setIsPreview] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [validationError, setValidationError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   // 同步笔记数据到编辑状态
   useEffect(() => {
@@ -50,7 +51,7 @@ export default function NoteEditor({
   }, [content]);
 
   // 保存笔记
-  const handleSave = () => {
+  const handleSave = async () => {
     // 清除之前的错误
     setValidationError("");
 
@@ -74,12 +75,21 @@ export default function NoteEditor({
       return;
     }
 
-    onSave({
-      id: note?.id,
-      title: title.trim(),
-      content: content.trim(),
-      categoryId,
-    });
+    setIsSaving(true);
+
+    try {
+      await onSave({
+        id: note?.id,
+        title: title.trim(),
+        content: content.trim(),
+        categoryId,
+      });
+    } catch (error) {
+      console.error("保存笔记失败:", error);
+      setValidationError("保存失败，请重试");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // 格式化时间
@@ -143,9 +153,24 @@ export default function NoteEditor({
               <>
                 <button
                   onClick={handleSave}
-                  className="bg-blue-500 text-white px-4 py-1 text-sm rounded hover:bg-blue-600 transition-colors"
+                  className={`px-4 py-1 text-sm rounded transition-colors flex items-center gap-1 ${
+                    isSaving
+                      ? "bg-gray-400 text-white cursor-not-allowed"
+                      : "bg-blue-500 text-white hover:bg-blue-600"
+                  }`}
+                  disabled={isSaving}
                 >
-                  💾 保存
+                  {isSaving ? (
+                    <>
+                      <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>保存中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>💾</span>
+                      <span>保存</span>
+                    </>
+                  )}
                 </button>
                 <button
                   onClick={onCancel}
