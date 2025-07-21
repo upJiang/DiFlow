@@ -1,8 +1,32 @@
+"use client";
+
+import { useState } from "react";
+
 /**
  * DiFlow 插件介绍组件
  * 展示插件的核心功能、安装指南和使用说明
  */
 export default function PluginSection() {
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  /**
+   * 处理复制命令行安装指令
+   */
+  const handleCopyInstallCommand = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        "code --install-extension junfeng.diflow"
+      );
+      setCopySuccess(true);
+      // 3秒后隐藏提示
+      setTimeout(() => {
+        setCopySuccess(false);
+      }, 3000);
+    } catch (error) {
+      console.error("复制失败:", error);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* 主要介绍区域 */}
@@ -25,16 +49,28 @@ export default function PluginSection() {
             >
               🔗 VS Code 市场下载
             </a>
-            <button
-              onClick={() =>
-                navigator.clipboard.writeText(
-                  "code --install-extension junfeng.diflow"
-                )
-              }
-              className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
-            >
-              📋 复制命令行安装
-            </button>
+            <div className="relative">
+              <button
+                onClick={handleCopyInstallCommand}
+                className={`px-6 py-3 rounded-lg transition-all duration-300 font-medium ${
+                  copySuccess
+                    ? "bg-green-600 text-white"
+                    : "bg-gray-600 text-white hover:bg-gray-700"
+                }`}
+              >
+                {copySuccess ? "✅ 复制成功" : "📋 复制命令行安装"}
+              </button>
+
+              {/* 复制成功提示动画 */}
+              {copySuccess && (
+                <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap animate-bounce">
+                  <div className="relative">
+                    安装命令已复制到剪贴板
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-green-500"></div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
