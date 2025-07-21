@@ -431,7 +431,7 @@ export default function RulesSection({
   const [selectedRule, setSelectedRule] = useState<string | null>(null);
 
   return (
-    <div className="space-y-6">
+    <div>
       <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/50">
         <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
           <span className="mr-3">📋</span>Cursor Rules 收录

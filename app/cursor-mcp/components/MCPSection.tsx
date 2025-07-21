@@ -177,7 +177,7 @@ export default function MCPSection({ onCopy, onOpenLink }: MCPSectionProps) {
   const [selectedMCP, setSelectedMCP] = useState<any>(null);
 
   return (
-    <div className="space-y-6">
+    <div>
       <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-xl border border-white/50">
         <h2 className="text-3xl font-bold text-gray-800 mb-6 text-center">
           <span className="mr-3">🔗</span>MCP 服务收录
