@@ -212,10 +212,13 @@ const mcpServersData = [
       "command": "npx",
       "args": [
         "-y",
-        "figma-developer-mcp",
-        "--figma-api-key=YOUR_FIGMA_API_KEY",
+        "figma-developer-mcp@beta",
+        "--figma-api-key=your_figma_api_key",
         "--stdio"
-      ]
+      ],
+      "env": {
+        "GET_NODE_SIZE_LIMIT": 25
+      }
     }
   }
 }`,
